@@ -1,5 +1,6 @@
 package com.commerceos.iam.controller;
 
+import com.commerceos.iam.dto.ApiResponse;
 import com.commerceos.iam.dto.request.CreateUserRequest;
 import com.commerceos.iam.dto.request.LoginRequest;
 import com.commerceos.iam.dto.request.RefreshTokenRequest;
@@ -25,48 +26,54 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/auth/signup")
-  public ResponseEntity<AuthResponse> signUp(
+  public ResponseEntity<ApiResponse<AuthResponse>> signUp(
       @Valid @RequestBody SignupRequest request, HttpServletRequest servletRequest) {
     String clientIp = extractClientIp(servletRequest);
     AuthResponse response = authService.signUp(request, clientIp);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.success("User registered successfully", response));
   }
 
   @PostMapping("/auth/login")
-  public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+  public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
     AuthResponse response = authService.login(request);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ApiResponse.success("Login successful", response));
   }
 
   @PostMapping("/auth/refresh")
-  public ResponseEntity<AuthResponse> refreshToken(
+  public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
       @Valid @RequestBody RefreshTokenRequest request) {
     AuthResponse response = authService.refreshToken(request.refreshToken());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
   }
 
   @PostMapping("/auth/logout")
-  public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+  public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
     authService.logout(request.refreshToken());
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
   }
 
   @PostMapping("/auth/logout-all")
-  public ResponseEntity<Void> logoutAll(@AuthenticationPrincipal User user) {
+  public ResponseEntity<ApiResponse<Void>> logoutAll(@AuthenticationPrincipal User user) {
     authService.logoutAll(user.getId());
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(ApiResponse.success("All sessions logged out successfully"));
   }
 
   @GetMapping("/auth/me")
-  public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User user) {
-    return ResponseEntity.ok(UserResponse.fromEntity(user));
+  public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+      @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(
+        ApiResponse.success("User profile fetched successfully", UserResponse.fromEntity(user)));
   }
 
   @PostMapping("/admin/users")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+  public ResponseEntity<ApiResponse<UserResponse>> createUser(
+      @Valid @RequestBody CreateUserRequest request) {
     User createdUser = authService.createUser(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.fromEntity(createdUser));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(
+            ApiResponse.success("User created successfully", UserResponse.fromEntity(createdUser)));
   }
 
   private String extractClientIp(HttpServletRequest request) {
