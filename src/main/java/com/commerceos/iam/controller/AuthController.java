@@ -25,7 +25,7 @@ public class AuthController {
 
   private final AuthService authService;
 
-  @PostMapping("/auth/signup")
+  @PostMapping({"/auth/signup", "/auth/register"})
   public ResponseEntity<ApiResponse<UserResponse>> signUp(
       @Valid @RequestBody SignupRequest request, HttpServletRequest servletRequest) {
     String clientIp = extractClientIp(servletRequest);
