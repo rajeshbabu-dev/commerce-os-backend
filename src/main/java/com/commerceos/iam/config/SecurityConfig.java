@@ -88,44 +88,36 @@ public class SecurityConfig {
   @Bean
   public AuthenticationEntryPoint unauthorizedEntryPoint() {
     return (request, response, authException) -> {
-      response.setContentType("application/problem+json");
+      response.setContentType("application/json");
       response.setStatus(401);
       response
           .getWriter()
           .write(
               """
               {
-                "type": "about:blank",
-                "title": "Unauthorized",
-                "status": 401,
-                "detail": "Authentication failed",
-                "instance": "%s"
+                "success": false,
+                "message": "Authentication failed",
+                "data": null
               }
-              """
-                  .formatted(request.getRequestURI())
-                  .stripIndent());
+              """);
     };
   }
 
   @Bean
   public AccessDeniedHandler accessDeniedHandler() {
     return (request, response, accessDeniedException) -> {
-      response.setContentType("application/problem+json");
+      response.setContentType("application/json");
       response.setStatus(403);
       response
           .getWriter()
           .write(
               """
               {
-                "type": "about:blank",
-                "title": "Forbidden",
-                "status": 403,
-                "detail": "You do not have permission to perform this action",
-                "instance": "%s"
+                "success": false,
+                "message": "You do not have permission to perform this action",
+                "data": null
               }
-              """
-                  .formatted(request.getRequestURI())
-                  .stripIndent());
+              """);
     };
   }
 }

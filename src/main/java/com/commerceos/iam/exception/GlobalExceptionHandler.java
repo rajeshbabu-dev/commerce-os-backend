@@ -1,11 +1,11 @@
 package com.commerceos.iam.exception;
 
-import java.net.URI;
+import com.commerceos.iam.dto.ApiResponse;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -13,88 +13,58 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/** Translates every exception into an RFC 7807 {@code ProblemDetail} response. */
+/** Translates every exception into a standardized {@link ApiResponse} payload. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-  private static final URI DEFAULT_TYPE = URI.create("about:blank");
 
   @ExceptionHandler(BusinessException.class)
-  public ProblemDetail handleBusinessException(BusinessException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(ex.getStatus()), ex.getMessage());
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle(HttpStatusCode.valueOf(ex.getStatus()).toString());
-    detail.setProperty("errorCode", ex.getErrorCode());
-    return detail;
+  public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
+    return ResponseEntity.status(ex.getStatus()).body(ApiResponse.error(ex.getMessage()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ProblemDetail handleValidationError(MethodArgumentNotValidException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(
-            HttpStatus.BAD_REQUEST, "Validation failed for the request body");
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Validation Error");
-    detail.setProperty("errorCode", "VALIDATION_ERROR");
-
+  public ResponseEntity<ApiResponse<List<FieldErrorEntry>>> handleValidationError(
+      MethodArgumentNotValidException ex) {
     var fieldErrors =
         ex.getBindingResult().getFieldErrors().stream()
             .map(
                 e -> new FieldErrorEntry(e.getField(), e.getRejectedValue(), e.getDefaultMessage()))
             .toList();
-    detail.setProperty("fieldErrors", fieldErrors);
-    return detail;
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.error("Validation failed for the request body", fieldErrors));
   }
 
-  private record FieldErrorEntry(String field, Object rejectedValue, String message) {}
+  public record FieldErrorEntry(String field, Object rejectedValue, String message) {}
 
   @ExceptionHandler(IllegalArgumentException.class)
-  public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Bad Request");
-    return detail;
+  public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
   }
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ProblemDetail handleBadCredentials(BadCredentialsException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Unauthorized");
-    return detail;
+  public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.error("Invalid email or password"));
   }
 
   @ExceptionHandler(AuthenticationException.class)
-  public ProblemDetail handleAuthentication(AuthenticationException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Authentication failed");
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Unauthorized");
-    return detail;
+  public ResponseEntity<ApiResponse<Void>> handleAuthentication(AuthenticationException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.error("Authentication failed"));
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(
-            HttpStatus.FORBIDDEN, "You do not have permission to perform this action");
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Forbidden");
-    return detail;
+  public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.error("You do not have permission to perform this action"));
   }
 
   @ExceptionHandler(Exception.class)
-  public ProblemDetail handleUnexpected(Exception ex) {
+  public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
     log.error("Unexpected error", ex);
-    ProblemDetail detail =
-        ProblemDetail.forStatusAndDetail(
-            HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong on our end, please try again");
-    detail.setType(DEFAULT_TYPE);
-    detail.setTitle("Internal Server Error");
-    return detail;
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ApiResponse.error("Something went wrong on our end, please try again"));
   }
 }
