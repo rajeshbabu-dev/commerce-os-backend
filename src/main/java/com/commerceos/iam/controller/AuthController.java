@@ -26,12 +26,12 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/auth/signup")
-  public ResponseEntity<ApiResponse<AuthResponse>> signUp(
+  public ResponseEntity<ApiResponse<UserResponse>> signUp(
       @Valid @RequestBody SignupRequest request, HttpServletRequest servletRequest) {
     String clientIp = extractClientIp(servletRequest);
-    AuthResponse response = authService.signUp(request, clientIp);
+    User user = authService.signUp(request, clientIp);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.success("User registered successfully", response));
+        .body(ApiResponse.success("User registered successfully", UserResponse.fromEntity(user)));
   }
 
   @PostMapping("/auth/login")

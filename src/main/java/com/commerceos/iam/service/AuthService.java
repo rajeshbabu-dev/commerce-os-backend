@@ -84,7 +84,7 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResponse signUp(SignupRequest request, String clientIp) {
+  public User signUp(SignupRequest request, String clientIp) {
     log.info("Public signup attempt for email: {} from IP: {}", request.email(), clientIp);
 
     if (loginRateLimiter.isSignupBlocked(clientIp)) {
@@ -125,7 +125,7 @@ public class AuthService {
     loginRateLimiter.clearSignupAttempts(clientIp);
     log.info("Public user self-registered successfully with ID: {}", savedUser.getId());
 
-    return generateAuthResponse(savedUser);
+    return savedUser;
   }
 
   @Transactional(noRollbackFor = BadCredentialsException.class)
