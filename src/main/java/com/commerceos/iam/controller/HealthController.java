@@ -1,6 +1,6 @@
 package com.commerceos.iam.controller;
 
-import com.commerceos.iam.dto.ApiResponse;
+import com.commerceos.common.dto.ApiResponse;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
