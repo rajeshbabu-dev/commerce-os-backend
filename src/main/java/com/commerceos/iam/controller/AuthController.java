@@ -1,6 +1,6 @@
 package com.commerceos.iam.controller;
 
-import com.commerceos.iam.dto.ApiResponse;
+import com.commerceos.common.dto.ApiResponse;
 import com.commerceos.iam.dto.request.CreateUserRequest;
 import com.commerceos.iam.dto.request.LoginRequest;
 import com.commerceos.iam.dto.request.RefreshTokenRequest;
