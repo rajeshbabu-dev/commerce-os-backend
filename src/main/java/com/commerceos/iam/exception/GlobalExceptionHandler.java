@@ -1,6 +1,6 @@
 package com.commerceos.iam.exception;
 
-import com.commerceos.iam.dto.ApiResponse;
+import com.commerceos.common.dto.ApiResponse;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
