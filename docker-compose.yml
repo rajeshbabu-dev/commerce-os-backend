@@ -87,6 +87,8 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
+    networks:
+      - backend-dev
 
   # -- Redis ---------------------------------------------------------------------
   redis:
