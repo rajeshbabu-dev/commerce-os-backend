@@ -62,8 +62,8 @@ server:
 
 jwt:
   secret: ${JWT_SECRET:vNhR5pdmd0I4+DnUlqFDH2MhGWGsbwoNg6icSzNHXnc=}
-  access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
-  refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:7d}
+  access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:900000}
+  refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:604800000}
 
 llm:
   provider: ${LLM_PROVIDER:claude}
