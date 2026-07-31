@@ -3,11 +3,11 @@ package com.commerceos.inventory.dto.response;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ProductResponse(
+public record StockItemResponseDto(
     UUID id,
-    String name,
-    String sku,
-    String description,
-    String unitOfMeasure,
+    ProductResponseDto product,
+    int quantityOnHand,
+    int reorderPoint,
+    int safetyStock,
     LocalDateTime createdAt,
     LocalDateTime updatedAt) {}

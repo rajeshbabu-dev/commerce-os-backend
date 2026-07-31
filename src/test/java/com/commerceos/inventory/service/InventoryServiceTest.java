@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.commerceos.inventory.dto.request.AdjustStockRequest;
+import com.commerceos.inventory.dto.request.AdjustStockRequestDto;
 import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
 import com.commerceos.inventory.entity.StockMovement;
+import com.commerceos.inventory.event.ReorderPointCalculator;
 import com.commerceos.inventory.repository.ProductRepository;
 import com.commerceos.inventory.repository.StockItemRepository;
 import com.commerceos.inventory.repository.StockMovementRepository;
+import com.commerceos.inventory.service.impl.InventoryServiceImpl;
 import com.commerceos.platform.exception.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -31,8 +34,9 @@ class InventoryServiceTest {
   @Mock private StockMovementRepository stockMovementRepository;
   @Mock private RabbitTemplate rabbitTemplate;
   @Mock private ObjectMapper objectMapper;
+  @Spy private ReorderPointCalculator reorderPointCalculator = new ReorderPointCalculator();
 
-  @InjectMocks private InventoryService inventoryService;
+  @InjectMocks private InventoryServiceImpl inventoryService;
 
   @Test
   @DisplayName("adjustStock rejects negative resulting quantity")
@@ -49,7 +53,7 @@ class InventoryServiceTest {
 
     when(stockItemRepository.findById(stockItemId)).thenReturn(Optional.of(item));
 
-    AdjustStockRequest request = new AdjustStockRequest(-20, "Test removal");
+    AdjustStockRequestDto request = new AdjustStockRequestDto(-20, "Test removal");
 
     BusinessException ex =
         assertThrows(
@@ -82,7 +86,7 @@ class InventoryServiceTest {
               return m;
             });
 
-    AdjustStockRequest request = new AdjustStockRequest(-5, "Order fulfillment");
+    AdjustStockRequestDto request = new AdjustStockRequestDto(-5, "Order fulfillment");
     StockMovement result = inventoryService.adjustStock(stockItemId, request, userId);
 
     assertNotNull(result);

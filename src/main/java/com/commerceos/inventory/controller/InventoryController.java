@@ -3,13 +3,13 @@ package com.commerceos.inventory.controller;
 import com.commerceos.common.dto.ApiResponse;
 import com.commerceos.common.dto.PagedResponse;
 import com.commerceos.iam.entity.User;
-import com.commerceos.inventory.dto.request.AdjustStockRequest;
-import com.commerceos.inventory.dto.request.CreateProductRequest;
-import com.commerceos.inventory.dto.request.CreateStockItemRequest;
-import com.commerceos.inventory.dto.request.UpdateProductRequest;
-import com.commerceos.inventory.dto.response.ProductResponse;
-import com.commerceos.inventory.dto.response.StockItemResponse;
-import com.commerceos.inventory.dto.response.StockMovementResponse;
+import com.commerceos.inventory.dto.request.AdjustStockRequestDto;
+import com.commerceos.inventory.dto.request.CreateProductRequestDto;
+import com.commerceos.inventory.dto.request.CreateStockItemRequestDto;
+import com.commerceos.inventory.dto.request.UpdateProductRequestDto;
+import com.commerceos.inventory.dto.response.ProductResponseDto;
+import com.commerceos.inventory.dto.response.StockItemResponseDto;
+import com.commerceos.inventory.dto.response.StockMovementResponseDto;
 import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
 import com.commerceos.inventory.entity.StockMovement;
@@ -39,8 +39,8 @@ public class InventoryController {
   // ---- Products ----
 
   @PostMapping("/products")
-  public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-      @Valid @RequestBody CreateProductRequest request) {
+  public ResponseEntity<ApiResponse<ProductResponseDto>> createProduct(
+      @Valid @RequestBody CreateProductRequestDto request) {
     Product product = inventoryService.createProduct(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(
@@ -49,18 +49,18 @@ public class InventoryController {
   }
 
   @GetMapping("/products")
-  public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> listProducts(
+  public ResponseEntity<ApiResponse<PagedResponse<ProductResponseDto>>> listProducts(
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
     Page<Product> productPage = inventoryService.listProducts(pageable);
-    List<ProductResponse> content = inventoryMapper.toProductResponseList(productPage.getContent());
+    List<ProductResponseDto> content = inventoryMapper.toProductResponseList(productPage.getContent());
     return ResponseEntity.ok(
         ApiResponse.success(
             "Products fetched successfully", PagedResponse.from(productPage, content)));
   }
 
   @GetMapping("/products/{id}")
-  public ResponseEntity<ApiResponse<ProductResponse>> getProduct(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<ProductResponseDto>> getProduct(@PathVariable UUID id) {
     Product product = inventoryService.getProduct(id);
     return ResponseEntity.ok(
         ApiResponse.success(
@@ -68,8 +68,8 @@ public class InventoryController {
   }
 
   @PutMapping("/products/{id}")
-  public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-      @PathVariable UUID id, @Valid @RequestBody UpdateProductRequest request) {
+  public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(
+      @PathVariable UUID id, @Valid @RequestBody UpdateProductRequestDto request) {
     Product product = inventoryService.updateProduct(id, request);
     return ResponseEntity.ok(
         ApiResponse.success(
@@ -79,8 +79,8 @@ public class InventoryController {
   // ---- Stock Items ----
 
   @PostMapping("/stock-items")
-  public ResponseEntity<ApiResponse<StockItemResponse>> createStockItem(
-      @Valid @RequestBody CreateStockItemRequest request) {
+  public ResponseEntity<ApiResponse<StockItemResponseDto>> createStockItem(
+      @Valid @RequestBody CreateStockItemRequestDto request) {
     StockItem item = inventoryService.createStockItem(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(
@@ -89,11 +89,11 @@ public class InventoryController {
   }
 
   @GetMapping("/stock-items")
-  public ResponseEntity<ApiResponse<PagedResponse<StockItemResponse>>> listStockItems(
+  public ResponseEntity<ApiResponse<PagedResponse<StockItemResponseDto>>> listStockItems(
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
     Page<StockItem> itemPage = inventoryService.listStockItems(pageable);
-    List<StockItemResponse> content =
+    List<StockItemResponseDto> content =
         inventoryMapper.toStockItemResponseList(itemPage.getContent());
     return ResponseEntity.ok(
         ApiResponse.success(
@@ -101,7 +101,7 @@ public class InventoryController {
   }
 
   @GetMapping("/stock-items/{id}")
-  public ResponseEntity<ApiResponse<StockItemResponse>> getStockItem(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<StockItemResponseDto>> getStockItem(@PathVariable UUID id) {
     StockItem item = inventoryService.getStockItem(id);
     return ResponseEntity.ok(
         ApiResponse.success(
@@ -111,9 +111,9 @@ public class InventoryController {
   // ---- Stock Adjustment ----
 
   @PostMapping("/stock-items/{id}/adjust")
-  public ResponseEntity<ApiResponse<StockMovementResponse>> adjustStock(
+  public ResponseEntity<ApiResponse<StockMovementResponseDto>> adjustStock(
       @PathVariable UUID id,
-      @Valid @RequestBody AdjustStockRequest request,
+      @Valid @RequestBody AdjustStockRequestDto request,
       @AuthenticationPrincipal User currentUser) {
     UUID userId = currentUser != null ? currentUser.getId() : UUID.randomUUID();
     StockMovement movement = inventoryService.adjustStock(id, request, userId);
@@ -123,9 +123,9 @@ public class InventoryController {
   }
 
   @GetMapping("/stock-items/{id}/movements")
-  public ResponseEntity<ApiResponse<List<StockMovementResponse>>> getStockMovements(
+  public ResponseEntity<ApiResponse<List<StockMovementResponseDto>>> getStockMovements(
       @PathVariable UUID id) {
-    List<StockMovementResponse> movements =
+    List<StockMovementResponseDto> movements =
         inventoryMapper.toStockMovementResponseList(inventoryService.getStockMovements(id));
     return ResponseEntity.ok(
         ApiResponse.success("Stock movements fetched successfully", movements));
