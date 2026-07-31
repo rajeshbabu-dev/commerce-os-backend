@@ -73,7 +73,7 @@ class AuthServiceTest {
     User result = authService.createUser(req);
 
     assertNotNull(result);
-    assertEquals("opsuser", result.getUsername());
+    assertEquals("opsuser", result.getDisplayName());
     assertEquals("ops@example.com", result.getEmail());
   }
 
