@@ -2,8 +2,8 @@ package com.commerceos.recommendation.controller;
 
 import com.commerceos.common.dto.ApiResponse;
 import com.commerceos.common.dto.PagedResponse;
-import com.commerceos.recommendation.dto.request.GenerateRecommendationRequest;
-import com.commerceos.recommendation.dto.response.PurchaseRecommendationResponse;
+import com.commerceos.recommendation.dto.request.GenerateRecommendationRequestDto;
+import com.commerceos.recommendation.dto.response.PurchaseRecommendationResponseDto;
 import com.commerceos.recommendation.entity.PurchaseRecommendation;
 import com.commerceos.recommendation.mapper.RecommendationMapper;
 import com.commerceos.recommendation.service.RecommendationService;
@@ -29,8 +29,8 @@ public class RecommendationController {
 
   @PostMapping("/generate")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE')")
-  public ResponseEntity<ApiResponse<PurchaseRecommendationResponse>> generateRecommendation(
-      @Valid @RequestBody GenerateRecommendationRequest request) {
+  public ResponseEntity<ApiResponse<PurchaseRecommendationResponseDto>> generateRecommendation(
+      @Valid @RequestBody GenerateRecommendationRequestDto request) {
     PurchaseRecommendation recommendation = recommendationService.generateFromRequest(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(
@@ -41,12 +41,12 @@ public class RecommendationController {
 
   @GetMapping
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
-  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponse>>>
+  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>>
       listRecommendations(
           @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
               Pageable pageable) {
     Page<PurchaseRecommendation> page = recommendationService.listAll(pageable);
-    PagedResponse<PurchaseRecommendationResponse> pagedResponse =
+    PagedResponse<PurchaseRecommendationResponseDto> pagedResponse =
         PagedResponse.from(page, recommendationMapper.toResponseList(page.getContent()));
     return ResponseEntity.ok(
         ApiResponse.success("Recommendations fetched successfully", pagedResponse));
@@ -54,7 +54,7 @@ public class RecommendationController {
 
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
-  public ResponseEntity<ApiResponse<PurchaseRecommendationResponse>> getRecommendation(
+  public ResponseEntity<ApiResponse<PurchaseRecommendationResponseDto>> getRecommendation(
       @PathVariable UUID id) {
     PurchaseRecommendation recommendation = recommendationService.getById(id);
     return ResponseEntity.ok(
@@ -65,12 +65,12 @@ public class RecommendationController {
 
   @GetMapping("/product/{productId}")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
-  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponse>>> getByProductId(
+  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>> getByProductId(
       @PathVariable UUID productId,
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
     Page<PurchaseRecommendation> page = recommendationService.getByProductId(productId, pageable);
-    PagedResponse<PurchaseRecommendationResponse> pagedResponse =
+    PagedResponse<PurchaseRecommendationResponseDto> pagedResponse =
         PagedResponse.from(page, recommendationMapper.toResponseList(page.getContent()));
     return ResponseEntity.ok(
         ApiResponse.success("Recommendations for product fetched successfully", pagedResponse));
@@ -78,12 +78,12 @@ public class RecommendationController {
 
   @GetMapping("/status/{status}")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
-  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponse>>> getByStatus(
+  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>> getByStatus(
       @PathVariable String status,
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
     Page<PurchaseRecommendation> page = recommendationService.getByStatus(status, pageable);
-    PagedResponse<PurchaseRecommendationResponse> pagedResponse =
+    PagedResponse<PurchaseRecommendationResponseDto> pagedResponse =
         PagedResponse.from(page, recommendationMapper.toResponseList(page.getContent()));
     return ResponseEntity.ok(
         ApiResponse.success("Recommendations by status fetched successfully", pagedResponse));
@@ -91,7 +91,7 @@ public class RecommendationController {
 
   @PostMapping("/{id}/dismiss")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE')")
-  public ResponseEntity<ApiResponse<PurchaseRecommendationResponse>> dismissRecommendation(
+  public ResponseEntity<ApiResponse<PurchaseRecommendationResponseDto>> dismissRecommendation(
       @PathVariable UUID id) {
     PurchaseRecommendation recommendation = recommendationService.dismiss(id);
     return ResponseEntity.ok(

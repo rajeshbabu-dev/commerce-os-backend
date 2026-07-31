@@ -10,7 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.commerceos.platform.exception.BusinessException;
 import com.commerceos.platform.exception.GlobalExceptionHandler;
 import com.commerceos.recommendation.controller.RecommendationController;
-import com.commerceos.recommendation.dto.request.GenerateRecommendationRequest;
+import com.commerceos.recommendation.dto.request.GenerateRecommendationRequestDto;
+import com.commerceos.recommendation.dto.response.PurchaseRecommendationResponseDto;
 import com.commerceos.recommendation.entity.PurchaseRecommendation;
 import com.commerceos.recommendation.mapper.RecommendationMapper;
 import com.commerceos.recommendation.service.RecommendationService;
@@ -34,16 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * MockMvc integration tests for the paginated recommendation endpoints.
- *
- * <p>Tests verify the HTTP layer: request parameter binding, response structure, pagination
- * metadata, and status codes — without requiring a real database.
- *
- * <p>Security filters are disabled here to isolate the controller/pagination logic. Security
- * constraints are validated via the {@code @PreAuthorize} annotations and the existing {@code
- * AuthIntegrationTest}.
- */
 @WebMvcTest(RecommendationController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
@@ -83,9 +74,8 @@ class RecommendationIntegrationTest {
             .build();
   }
 
-  private com.commerceos.recommendation.dto.response.PurchaseRecommendationResponse
-      sampleResponse() {
-    return new com.commerceos.recommendation.dto.response.PurchaseRecommendationResponse(
+  private PurchaseRecommendationResponseDto sampleResponse() {
+    return new PurchaseRecommendationResponseDto(
         sampleRec.getId(),
         sampleRec.getProductId(),
         sampleRec.getRecommendedSupplierId(),
@@ -99,10 +89,6 @@ class RecommendationIntegrationTest {
         sampleRec.getCreatedAt(),
         sampleRec.getUpdatedAt());
   }
-
-  // ===========================================================================
-  // GET /api/v1/recommendations — list all (paginated)
-  // ===========================================================================
 
   @Nested
   @DisplayName("GET /api/v1/recommendations")
@@ -195,10 +181,6 @@ class RecommendationIntegrationTest {
     }
   }
 
-  // ===========================================================================
-  // GET /api/v1/recommendations/{id} — get by ID
-  // ===========================================================================
-
   @Nested
   @DisplayName("GET /api/v1/recommendations/{id}")
   class GetRecommendation {
@@ -233,10 +215,6 @@ class RecommendationIntegrationTest {
     }
   }
 
-  // ===========================================================================
-  // GET /api/v1/recommendations/product/{productId} — by product (paginated)
-  // ===========================================================================
-
   @Nested
   @DisplayName("GET /api/v1/recommendations/product/{productId}")
   class GetByProductId {
@@ -263,10 +241,6 @@ class RecommendationIntegrationTest {
           .andExpect(jsonPath("$.data.totalElements").value(1));
     }
   }
-
-  // ===========================================================================
-  // GET /api/v1/recommendations/status/{status} — by status (paginated)
-  // ===========================================================================
 
   @Nested
   @DisplayName("GET /api/v1/recommendations/status/{status}")
@@ -308,10 +282,6 @@ class RecommendationIntegrationTest {
     }
   }
 
-  // ===========================================================================
-  // POST /api/v1/recommendations/generate — generate recommendation
-  // ===========================================================================
-
   @Nested
   @DisplayName("POST /api/v1/recommendations/generate")
   class GenerateRecommendation {
@@ -319,7 +289,7 @@ class RecommendationIntegrationTest {
     @Test
     @DisplayName("creates recommendation and returns 201")
     void creates() throws Exception {
-      when(recommendationService.generateFromRequest(any(GenerateRecommendationRequest.class)))
+      when(recommendationService.generateFromRequest(any(GenerateRecommendationRequestDto.class)))
           .thenReturn(sampleRec);
       when(recommendationMapper.toResponse(sampleRec)).thenReturn(sampleResponse());
 
@@ -341,10 +311,6 @@ class RecommendationIntegrationTest {
           .andExpect(jsonPath("$.data.urgencyLevel").value("HIGH"));
     }
   }
-
-  // ===========================================================================
-  // POST /api/v1/recommendations/{id}/dismiss — dismiss
-  // ===========================================================================
 
   @Nested
   @DisplayName("POST /api/v1/recommendations/{id}/dismiss")
@@ -369,7 +335,7 @@ class RecommendationIntegrationTest {
               .build();
 
       var dismissedResponse =
-          new com.commerceos.recommendation.dto.response.PurchaseRecommendationResponse(
+          new PurchaseRecommendationResponseDto(
               dismissed.getId(),
               dismissed.getProductId(),
               dismissed.getRecommendedSupplierId(),

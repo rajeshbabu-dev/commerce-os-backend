@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record PurchaseRecommendationResponse(
+public record PurchaseRecommendationResponseDto(
     UUID id,
     UUID productId,
     UUID recommendedSupplierId,

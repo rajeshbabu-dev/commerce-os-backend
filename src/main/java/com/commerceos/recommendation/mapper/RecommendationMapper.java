@@ -1,6 +1,6 @@
 package com.commerceos.recommendation.mapper;
 
-import com.commerceos.recommendation.dto.response.PurchaseRecommendationResponse;
+import com.commerceos.recommendation.dto.response.PurchaseRecommendationResponseDto;
 import com.commerceos.recommendation.entity.PurchaseRecommendation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +13,11 @@ public class RecommendationMapper {
 
   private final ModelMapper modelMapper;
 
-  public PurchaseRecommendationResponse toResponse(PurchaseRecommendation recommendation) {
-    return modelMapper.map(recommendation, PurchaseRecommendationResponse.class);
+  public PurchaseRecommendationResponseDto toResponse(PurchaseRecommendation recommendation) {
+    return modelMapper.map(recommendation, PurchaseRecommendationResponseDto.class);
   }
 
-  public List<PurchaseRecommendationResponse> toResponseList(
+  public List<PurchaseRecommendationResponseDto> toResponseList(
       List<PurchaseRecommendation> recommendations) {
     return recommendations.stream().map(this::toResponse).toList();
   }
