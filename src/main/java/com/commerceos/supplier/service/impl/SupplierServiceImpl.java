@@ -156,7 +156,8 @@ public class SupplierServiceImpl implements SupplierService {
   @Override
   @Transactional
   @PreAuthorize("hasAuthority('supplier:map')")
-  public SupplierProductResponseDto mapProduct(UUID supplierId, MapSupplierProductRequestDto request) {
+  public SupplierProductResponseDto mapProduct(
+      UUID supplierId, MapSupplierProductRequestDto request) {
     log.info(
         "Mapping supplier {} to product {} (cost: {}, lead: {}d, primary: {})",
         supplierId,

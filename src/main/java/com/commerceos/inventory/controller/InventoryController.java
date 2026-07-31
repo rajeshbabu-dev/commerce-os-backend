@@ -53,7 +53,8 @@ public class InventoryController {
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
     Page<Product> productPage = inventoryService.listProducts(pageable);
-    List<ProductResponseDto> content = inventoryMapper.toProductResponseList(productPage.getContent());
+    List<ProductResponseDto> content =
+        inventoryMapper.toProductResponseList(productPage.getContent());
     return ResponseEntity.ok(
         ApiResponse.success(
             "Products fetched successfully", PagedResponse.from(productPage, content)));

@@ -163,7 +163,8 @@ public class InventoryServiceImpl implements InventoryService {
         stockItemRepository
             .findById(stockItemId)
             .orElseThrow(
-                () -> new ResourceNotFoundException("STOCK_ITEM_NOT_FOUND", "Stock item not found"));
+                () ->
+                    new ResourceNotFoundException("STOCK_ITEM_NOT_FOUND", "Stock item not found"));
 
     int quantityBefore = item.getQuantityOnHand();
     int quantityAfter = quantityBefore + request.quantityChange();

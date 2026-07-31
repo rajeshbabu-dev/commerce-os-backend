@@ -65,15 +65,7 @@ class SupplierServiceTest {
         SupplierPerformance.builder().id(UUID.randomUUID()).supplier(supplier).build();
     SupplierResponseDto dummyResp =
         new SupplierResponseDto(
-            supplier.getId(),
-            "Acme",
-            "acme@test.com",
-            "123",
-            "Addr",
-            "NET_30",
-            null,
-            null,
-            null);
+            supplier.getId(), "Acme", "acme@test.com", "123", "Addr", "NET_30", null, null, null);
 
     when(supplierRepository.existsByContactEmail("acme@test.com")).thenReturn(false);
     when(supplierRepository.save(any())).thenReturn(supplier);

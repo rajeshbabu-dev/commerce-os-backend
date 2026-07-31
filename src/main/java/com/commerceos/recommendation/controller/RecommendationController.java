@@ -65,10 +65,11 @@ public class RecommendationController {
 
   @GetMapping("/product/{productId}")
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
-  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>> getByProductId(
-      @PathVariable UUID productId,
-      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-          Pageable pageable) {
+  public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>>
+      getByProductId(
+          @PathVariable UUID productId,
+          @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+              Pageable pageable) {
     Page<PurchaseRecommendation> page = recommendationService.getByProductId(productId, pageable);
     PagedResponse<PurchaseRecommendationResponseDto> pagedResponse =
         PagedResponse.from(page, recommendationMapper.toResponseList(page.getContent()));

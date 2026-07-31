@@ -2,9 +2,7 @@ package com.commerceos.recommendation.calculator;
 
 import org.springframework.stereotype.Component;
 
-/**
- * Domain calculator for demand forecasting & reorder quantity managed by Spring DI.
- */
+/** Domain calculator for demand forecasting & reorder quantity managed by Spring DI. */
 @Component
 public class DemandForecastCalculator {
 

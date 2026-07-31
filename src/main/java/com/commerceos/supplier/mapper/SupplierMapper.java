@@ -17,7 +17,8 @@ public class SupplierMapper {
 
   private final ModelMapper modelMapper;
 
-  public SupplierResponseDto toSupplierResponse(Supplier supplier, SupplierPerformance performance) {
+  public SupplierResponseDto toSupplierResponse(
+      Supplier supplier, SupplierPerformance performance) {
     if (supplier == null) return null;
     SupplierPerformanceResponseDto perfResponse =
         performance != null ? toPerformanceResponse(performance) : null;

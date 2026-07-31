@@ -59,10 +59,12 @@ public class AuthServiceImpl implements AuthService {
         "Admin creating user with username: {} and email: {}", request.username(), request.email());
 
     if (userRepository.existsByEmail(request.email())) {
-      throw new DuplicateResourceException("EMAIL_ALREADY_EXISTS", "A user with this email already exists");
+      throw new DuplicateResourceException(
+          "EMAIL_ALREADY_EXISTS", "A user with this email already exists");
     }
     if (userRepository.existsByUsername(request.username())) {
-      throw new DuplicateResourceException("USERNAME_ALREADY_EXISTS", "A user with this username already exists");
+      throw new DuplicateResourceException(
+          "USERNAME_ALREADY_EXISTS", "A user with this username already exists");
     }
 
     Role role =
@@ -70,7 +72,8 @@ public class AuthServiceImpl implements AuthService {
             .findByName(request.roleName())
             .orElseThrow(
                 () ->
-                    new ResourceNotFoundException("ROLE_NOT_FOUND", "Role not found: " + request.roleName()));
+                    new ResourceNotFoundException(
+                        "ROLE_NOT_FOUND", "Role not found: " + request.roleName()));
 
     User user =
         User.builder()
@@ -98,11 +101,13 @@ public class AuthServiceImpl implements AuthService {
 
     if (userRepository.existsByEmail(request.email())) {
       loginRateLimiter.recordSignupAttempt(clientIp);
-      throw new DuplicateResourceException("EMAIL_ALREADY_EXISTS", "A user with this email already exists");
+      throw new DuplicateResourceException(
+          "EMAIL_ALREADY_EXISTS", "A user with this email already exists");
     }
     if (userRepository.existsByUsername(request.username())) {
       loginRateLimiter.recordSignupAttempt(clientIp);
-      throw new DuplicateResourceException("USERNAME_ALREADY_EXISTS", "A user with this username already exists");
+      throw new DuplicateResourceException(
+          "USERNAME_ALREADY_EXISTS", "A user with this username already exists");
     }
 
     Role viewerRole =
@@ -110,7 +115,8 @@ public class AuthServiceImpl implements AuthService {
             .findByName("VIEWER")
             .orElseThrow(
                 () ->
-                    new ResourceNotFoundException("ROLE_NOT_FOUND", "Default VIEWER role not configured"));
+                    new ResourceNotFoundException(
+                        "ROLE_NOT_FOUND", "Default VIEWER role not configured"));
 
     User user =
         User.builder()
@@ -177,7 +183,8 @@ public class AuthServiceImpl implements AuthService {
             .findByEmail(email)
             .orElseThrow(
                 () ->
-                    new ResourceNotFoundException("USER_NOT_FOUND", "User not found for refresh token"));
+                    new ResourceNotFoundException(
+                        "USER_NOT_FOUND", "User not found for refresh token"));
 
     if (!jwtUtil.isTokenValid(refreshToken, user)) {
       throw new InvalidCredentialsException("Refresh token has expired");

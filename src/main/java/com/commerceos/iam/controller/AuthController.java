@@ -31,11 +31,13 @@ public class AuthController {
     String clientIp = extractClientIp(servletRequest);
     User user = authService.signUp(request, clientIp);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.success("User registered successfully", UserResponseDto.fromEntity(user)));
+        .body(
+            ApiResponse.success("User registered successfully", UserResponseDto.fromEntity(user)));
   }
 
   @PostMapping("/auth/login")
-  public ResponseEntity<ApiResponse<AuthResponseDto>> login(@Valid @RequestBody LoginRequestDto request) {
+  public ResponseEntity<ApiResponse<AuthResponseDto>> login(
+      @Valid @RequestBody LoginRequestDto request) {
     AuthResponseDto response = authService.login(request);
     return ResponseEntity.ok(ApiResponse.success("Login successful", response));
   }
@@ -48,7 +50,8 @@ public class AuthController {
   }
 
   @PostMapping("/auth/logout")
-  public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequestDto request) {
+  public ResponseEntity<ApiResponse<Void>> logout(
+      @Valid @RequestBody RefreshTokenRequestDto request) {
     authService.logout(request.refreshToken());
     return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
   }
@@ -73,7 +76,8 @@ public class AuthController {
     User createdUser = authService.createUser(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(
-            ApiResponse.success("User created successfully", UserResponseDto.fromEntity(createdUser)));
+            ApiResponse.success(
+                "User created successfully", UserResponseDto.fromEntity(createdUser)));
   }
 
   private String extractClientIp(HttpServletRequest request) {

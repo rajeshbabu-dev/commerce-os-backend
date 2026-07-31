@@ -5,9 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
-/**
- * Domain calculator for ranking suppliers managed by Spring DI.
- */
+/** Domain calculator for ranking suppliers managed by Spring DI. */
 @Component
 public class SupplierRanker {
 
