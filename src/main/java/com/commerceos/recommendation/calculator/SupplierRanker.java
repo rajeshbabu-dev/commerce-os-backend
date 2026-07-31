@@ -3,12 +3,12 @@ package com.commerceos.recommendation.calculator;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
- * Pure POJO domain calculator for ranking suppliers based on unit cost, lead time, and performance
- * score. Formula score = (Fulfillment Rate * 0.4) - (Unit Cost * 0.4) - (Lead Time Days * 0.2) +
- * (Primary Bonus)
+ * Domain calculator for ranking suppliers managed by Spring DI.
  */
+@Component
 public class SupplierRanker {
 
   public record CandidateSupplier(

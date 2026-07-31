@@ -1,10 +1,11 @@
 package com.commerceos.recommendation.calculator;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Pure POJO domain calculator for demand forecasting & reorder quantity. Reorder Quantity = Demand
- * over Lead Time + Safety Stock - Current Available Stock. Ensures a minimum order quantity of at
- * least 1 unit if reorder is triggered.
+ * Domain calculator for demand forecasting & reorder quantity managed by Spring DI.
  */
+@Component
 public class DemandForecastCalculator {
 
   public int forecastDemand(int avgDailyDemand, int days) {

@@ -2,15 +2,15 @@ package com.commerceos.iam.dto.response;
 
 import java.util.Set;
 
-public record AuthResponse(
+public record AuthResponseDto(
     String accessToken,
     String refreshToken,
     String tokenType,
     long expiresInSeconds,
     Set<String> roles) {
 
-  public static AuthResponse of(
+  public static AuthResponseDto of(
       String accessToken, String refreshToken, long expiresInSeconds, Set<String> roles) {
-    return new AuthResponse(accessToken, refreshToken, "Bearer", expiresInSeconds, roles);
+    return new AuthResponseDto(accessToken, refreshToken, "Bearer", expiresInSeconds, roles);
   }
 }
