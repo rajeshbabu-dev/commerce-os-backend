@@ -1,5 +1,6 @@
 package com.commerceos.supplier.controller;
 
+import com.commerceos.common.dto.PagedResponse;
 import com.commerceos.iam.dto.ApiResponse;
 import com.commerceos.supplier.dto.request.CreateSupplierRequest;
 import com.commerceos.supplier.dto.request.MapSupplierProductRequest;
@@ -11,6 +12,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +35,11 @@ public class SupplierController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<List<SupplierResponse>>> listSuppliers() {
-    List<SupplierResponse> suppliers = supplierService.listSuppliers();
-    return ResponseEntity.ok(ApiResponse.success("Suppliers fetched successfully", suppliers));
+  public ResponseEntity<ApiResponse<PagedResponse<SupplierResponse>>> listSuppliers(
+      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+          Pageable pageable) {
+    PagedResponse<SupplierResponse> result = supplierService.listSuppliers(pageable);
+    return ResponseEntity.ok(ApiResponse.success("Suppliers fetched successfully", result));
   }
 
   @GetMapping("/{id}")

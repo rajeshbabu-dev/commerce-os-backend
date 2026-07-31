@@ -1,4 +1,4 @@
-package com.commerceos.iam.config;
+package com.commerceos.platform.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

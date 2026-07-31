@@ -1,4 +1,4 @@
-package com.commerceos.iam.exception;
+package com.commerceos.platform.exception;
 
 import com.commerceos.common.dto.ApiResponse;
 import java.util.List;

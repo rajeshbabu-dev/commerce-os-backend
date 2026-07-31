@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.commerceos.iam.exception.BusinessException;
 import com.commerceos.inventory.dto.request.AdjustStockRequest;
 import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
@@ -12,6 +11,7 @@ import com.commerceos.inventory.entity.StockMovement;
 import com.commerceos.inventory.repository.ProductRepository;
 import com.commerceos.inventory.repository.StockItemRepository;
 import com.commerceos.inventory.repository.StockMovementRepository;
+import com.commerceos.platform.exception.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;

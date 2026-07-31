@@ -1,6 +1,7 @@
 package com.commerceos.supplier.service;
 
-import com.commerceos.iam.exception.BusinessException;
+import com.commerceos.common.dto.PagedResponse;
+import com.commerceos.platform.exception.BusinessException;
 import com.commerceos.supplier.dto.request.CreateSupplierRequest;
 import com.commerceos.supplier.dto.request.MapSupplierProductRequest;
 import com.commerceos.supplier.dto.request.UpdateSupplierRequest;
@@ -9,16 +10,22 @@ import com.commerceos.supplier.dto.response.SupplierResponse;
 import com.commerceos.supplier.entity.Supplier;
 import com.commerceos.supplier.entity.SupplierPerformance;
 import com.commerceos.supplier.entity.SupplierProduct;
+import com.commerceos.supplier.mapper.SupplierMapper;
 import com.commerceos.supplier.repository.SupplierPerformanceRepository;
 import com.commerceos.supplier.repository.SupplierProductRepository;
 import com.commerceos.supplier.repository.SupplierRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +39,7 @@ public class SupplierService {
   private final SupplierRepository supplierRepository;
   private final SupplierProductRepository supplierProductRepository;
   private final SupplierPerformanceRepository supplierPerformanceRepository;
+  private final SupplierMapper supplierMapper;
 
   // ---- Supplier CRUD ----
 
@@ -63,19 +71,26 @@ public class SupplierService {
     SupplierPerformance savedPerf = supplierPerformanceRepository.save(perf);
 
     log.info("Supplier created with ID: {}", saved.getId());
-    return SupplierResponse.fromEntity(saved, savedPerf);
+    return supplierMapper.toSupplierResponse(saved, savedPerf);
   }
 
   @PreAuthorize("hasAuthority('supplier:read')")
-  public List<SupplierResponse> listSuppliers() {
-    return supplierRepository.findByDeactivatedAtIsNull().stream()
-        .map(
-            s -> {
-              SupplierPerformance perf =
-                  supplierPerformanceRepository.findBySupplierId(s.getId()).orElse(null);
-              return SupplierResponse.fromEntity(s, perf);
-            })
-        .toList();
+  public PagedResponse<SupplierResponse> listSuppliers(Pageable pageable) {
+    Page<Supplier> supplierPage = supplierRepository.findByDeactivatedAtIsNull(pageable);
+
+    // Batch fetch performance records in a single query (fixes N+1)
+    List<UUID> supplierIds = supplierPage.getContent().stream().map(Supplier::getId).toList();
+
+    Map<UUID, SupplierPerformance> perfMap =
+        supplierPerformanceRepository.findAllBySupplierIdIn(supplierIds).stream()
+            .collect(Collectors.toMap(p -> p.getSupplier().getId(), Function.identity()));
+
+    List<SupplierResponse> content =
+        supplierPage.getContent().stream()
+            .map(s -> supplierMapper.toSupplierResponse(s, perfMap.get(s.getId())))
+            .toList();
+
+    return PagedResponse.from(supplierPage, content);
   }
 
   @PreAuthorize("hasAuthority('supplier:read')")
@@ -88,7 +103,7 @@ public class SupplierService {
 
     SupplierPerformance perf =
         supplierPerformanceRepository.findBySupplierId(supplier.getId()).orElse(null);
-    return SupplierResponse.fromEntity(supplier, perf);
+    return supplierMapper.toSupplierResponse(supplier, perf);
   }
 
   @Transactional
@@ -111,7 +126,7 @@ public class SupplierService {
     Supplier updated = supplierRepository.save(supplier);
     SupplierPerformance perf =
         supplierPerformanceRepository.findBySupplierId(updated.getId()).orElse(null);
-    return SupplierResponse.fromEntity(updated, perf);
+    return supplierMapper.toSupplierResponse(updated, perf);
   }
 
   @Transactional
@@ -181,7 +196,7 @@ public class SupplierService {
     }
 
     SupplierProduct saved = supplierProductRepository.save(mapping);
-    return SupplierProductResponse.fromEntity(saved);
+    return supplierMapper.toSupplierProductResponse(saved);
   }
 
   @Transactional
@@ -202,15 +217,14 @@ public class SupplierService {
 
   @PreAuthorize("hasAuthority('supplier:read')")
   public List<SupplierProductResponse> listSupplierProducts(UUID supplierId) {
-    return supplierProductRepository.findBySupplierId(supplierId).stream()
-        .map(SupplierProductResponse::fromEntity)
-        .toList();
+    return supplierMapper.toSupplierProductResponseList(
+        supplierProductRepository.findBySupplierId(supplierId));
   }
 
   @PreAuthorize("hasAuthority('supplier:read')")
   public List<SupplierProductResponse> getEligibleSuppliers(UUID productId) {
-    return supplierProductRepository.findByProductId(productId).stream()
-        .map(SupplierProductResponse::fromEntity)
+    List<SupplierProduct> list = supplierProductRepository.findByProductId(productId);
+    return supplierMapper.toSupplierProductResponseList(list).stream()
         .sorted(
             (a, b) -> {
               if (a.isPrimary()) return -1;

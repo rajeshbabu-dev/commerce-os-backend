@@ -1,11 +1,11 @@
-package com.commerceos.iam.exception;
+package com.commerceos.platform.exception;
 
 /**
  * Base exception for all business-rule violations in the system.
  *
  * <p>Each exception carries an error code (machine-readable, e.g. {@code SELF_APPROVAL}) and an
- * HTTP status that the {@link GlobalExceptionHandler} uses to build RFC 7807 {@code ProblemDetail}
- * responses.
+ * HTTP status that the {@link GlobalExceptionHandler} uses to build standardized {@code
+ * ApiResponse} responses.
  */
 public class BusinessException extends RuntimeException {
 

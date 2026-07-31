@@ -1,10 +1,12 @@
-package com.commerceos.iam.config;
+package com.commerceos.platform.security;
 
-import com.commerceos.iam.filter.CorrelationIdFilter;
-import com.commerceos.iam.filter.JwtAuthenticationFilter;
+import com.commerceos.common.dto.ApiResponse;
+import com.commerceos.platform.logging.CorrelationIdFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,11 +35,20 @@ public class SecurityConfig {
   private final CorrelationIdFilter correlationIdFilter;
   private final UserDetailsService userDetailsService;
   private final CorsConfigurationSource corsConfigurationSource;
+  private final ObjectMapper objectMapper;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(AbstractHttpConfigurer::disable)
+        .headers(
+            headers ->
+                headers
+                    .contentTypeOptions(contentType -> {})
+                    .frameOptions(frame -> frame.deny())
+                    .xssProtection(xss -> {})
+                    .httpStrictTransportSecurity(
+                        hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
@@ -58,7 +69,7 @@ public class SecurityConfig {
         .exceptionHandling(
             exceptions ->
                 exceptions
-                    .authenticationEntryPoint(unauthorizedEntryPoint())
+                    .authenticationEntryPoint(authenticationEntryPoint())
                     .accessDeniedHandler(accessDeniedHandler()))
         .authenticationProvider(authenticationProvider())
         .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
@@ -87,38 +98,25 @@ public class SecurityConfig {
   }
 
   @Bean
-  public AuthenticationEntryPoint unauthorizedEntryPoint() {
+  public AuthenticationEntryPoint authenticationEntryPoint() {
     return (request, response, authException) -> {
-      response.setContentType("application/json");
+      ApiResponse<Void> body = ApiResponse.error("Authentication failed");
       response.setStatus(401);
-      response
-          .getWriter()
-          .write(
-              """
-              {
-                "success": false,
-                "message": "Authentication failed",
-                "data": null
-              }
-              """);
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.setCharacterEncoding("UTF-8");
+      response.getWriter().write(objectMapper.writeValueAsString(body));
     };
   }
 
   @Bean
   public AccessDeniedHandler accessDeniedHandler() {
     return (request, response, accessDeniedException) -> {
-      response.setContentType("application/json");
+      ApiResponse<Void> body =
+          ApiResponse.error("You do not have permission to perform this action");
       response.setStatus(403);
-      response
-          .getWriter()
-          .write(
-              """
-              {
-                "success": false,
-                "message": "You do not have permission to perform this action",
-                "data": null
-              }
-              """);
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.setCharacterEncoding("UTF-8");
+      response.getWriter().write(objectMapper.writeValueAsString(body));
     };
   }
 }

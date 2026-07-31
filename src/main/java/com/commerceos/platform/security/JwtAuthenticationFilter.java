@@ -1,6 +1,5 @@
-package com.commerceos.iam.filter;
+package com.commerceos.platform.security;
 
-import com.commerceos.iam.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +15,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Extracts a JWT from the {@code Authorization} header, validates it, and sets the authenticated
+ * user in the {@link SecurityContextHolder}.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

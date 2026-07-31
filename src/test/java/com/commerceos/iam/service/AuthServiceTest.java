@@ -9,12 +9,12 @@ import com.commerceos.iam.dto.request.LoginRequest;
 import com.commerceos.iam.dto.request.SignupRequest;
 import com.commerceos.iam.entity.Role;
 import com.commerceos.iam.entity.User;
-import com.commerceos.iam.exception.BusinessException;
 import com.commerceos.iam.redis.LoginRateLimiter;
 import com.commerceos.iam.redis.RefreshTokenRedisService;
 import com.commerceos.iam.repository.RoleRepository;
 import com.commerceos.iam.repository.UserRepository;
-import com.commerceos.iam.util.JwtUtil;
+import com.commerceos.platform.exception.BusinessException;
+import com.commerceos.platform.security.JwtUtil;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -72,7 +72,7 @@ class AuthServiceTest {
     User result = authService.createUser(req);
 
     assertNotNull(result);
-    assertEquals("opsuser", result.getUsername());
+    assertEquals("ops@example.com", result.getUsername());
     assertEquals("ops@example.com", result.getEmail());
   }
 

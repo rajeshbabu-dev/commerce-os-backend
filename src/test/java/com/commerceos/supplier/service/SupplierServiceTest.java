@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.commerceos.iam.exception.BusinessException;
+import com.commerceos.platform.exception.BusinessException;
 import com.commerceos.supplier.dto.request.CreateSupplierRequest;
 import com.commerceos.supplier.dto.request.MapSupplierProductRequest;
 import com.commerceos.supplier.dto.response.SupplierProductResponse;
@@ -12,6 +12,7 @@ import com.commerceos.supplier.dto.response.SupplierResponse;
 import com.commerceos.supplier.entity.Supplier;
 import com.commerceos.supplier.entity.SupplierPerformance;
 import com.commerceos.supplier.entity.SupplierProduct;
+import com.commerceos.supplier.mapper.SupplierMapper;
 import com.commerceos.supplier.repository.SupplierPerformanceRepository;
 import com.commerceos.supplier.repository.SupplierProductRepository;
 import com.commerceos.supplier.repository.SupplierRepository;
@@ -31,6 +32,7 @@ class SupplierServiceTest {
   @Mock private SupplierRepository supplierRepository;
   @Mock private SupplierProductRepository supplierProductRepository;
   @Mock private SupplierPerformanceRepository supplierPerformanceRepository;
+  @Mock private SupplierMapper supplierMapper;
 
   @InjectMocks private SupplierService supplierService;
 
@@ -60,10 +62,23 @@ class SupplierServiceTest {
             .build();
     SupplierPerformance perf =
         SupplierPerformance.builder().id(UUID.randomUUID()).supplier(supplier).build();
+    SupplierResponse dummyResp =
+        new SupplierResponse(
+            supplier.getId(),
+            "Acme",
+            "acme@test.com",
+            "123",
+            "Addr",
+            "NET_30",
+            true,
+            null,
+            null,
+            null);
 
     when(supplierRepository.existsByContactEmail("acme@test.com")).thenReturn(false);
     when(supplierRepository.save(any())).thenReturn(supplier);
     when(supplierPerformanceRepository.save(any())).thenReturn(perf);
+    when(supplierMapper.toSupplierResponse(any(), any())).thenReturn(dummyResp);
 
     SupplierResponse response = supplierService.createSupplier(req);
     assertNotNull(response);
@@ -84,6 +99,17 @@ class SupplierServiceTest {
             .productId(productId)
             .isPrimary(true)
             .build();
+    SupplierProductResponse dummyResp =
+        new SupplierProductResponse(
+            UUID.randomUUID(),
+            supplierId,
+            "Acme",
+            productId,
+            new BigDecimal("50.00"),
+            5,
+            true,
+            null,
+            null);
 
     when(supplierRepository.findByIdAndDeactivatedAtIsNull(supplierId))
         .thenReturn(Optional.of(supplier));
@@ -92,6 +118,7 @@ class SupplierServiceTest {
     when(supplierProductRepository.findBySupplierIdAndProductId(supplierId, productId))
         .thenReturn(Optional.empty());
     when(supplierProductRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+    when(supplierMapper.toSupplierProductResponse(any())).thenReturn(dummyResp);
 
     MapSupplierProductRequest req =
         new MapSupplierProductRequest(productId, new BigDecimal("50.00"), 5, true);

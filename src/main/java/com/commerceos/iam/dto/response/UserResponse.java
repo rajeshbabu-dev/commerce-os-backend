@@ -27,7 +27,7 @@ public record UserResponse(
 
     return new UserResponse(
         user.getId(),
-        user.getUsername(),
+        user.getDisplayName(),
         user.getEmail(),
         roleNames,
         permissionNames,

@@ -1,6 +1,5 @@
 package com.commerceos.inventory.service;
 
-import com.commerceos.iam.exception.BusinessException;
 import com.commerceos.inventory.config.RabbitMQInventoryConfig;
 import com.commerceos.inventory.dto.request.AdjustStockRequest;
 import com.commerceos.inventory.dto.request.CreateProductRequest;
@@ -14,6 +13,7 @@ import com.commerceos.inventory.event.ReorderPointCalculator;
 import com.commerceos.inventory.repository.ProductRepository;
 import com.commerceos.inventory.repository.StockItemRepository;
 import com.commerceos.inventory.repository.StockMovementRepository;
+import com.commerceos.platform.exception.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,8 +67,8 @@ public class InventoryService {
   }
 
   @PreAuthorize("hasAuthority('inventory:read')")
-  public List<Product> listProducts() {
-    return productRepository.findAll();
+  public Page<Product> listProducts(Pageable pageable) {
+    return productRepository.findAll(pageable);
   }
 
   @PreAuthorize("hasAuthority('inventory:read')")
@@ -124,8 +126,8 @@ public class InventoryService {
   }
 
   @PreAuthorize("hasAuthority('inventory:read')")
-  public List<StockItem> listStockItems() {
-    return stockItemRepository.findAll();
+  public Page<StockItem> listStockItems(Pageable pageable) {
+    return stockItemRepository.findAll(pageable);
   }
 
   @PreAuthorize("hasAuthority('inventory:read')")

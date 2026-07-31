@@ -1,4 +1,4 @@
-package com.commerceos.iam.util;
+package com.commerceos.platform.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +19,7 @@ class JwtUtilTest {
   @BeforeEach
   void setUp() {
     jwtUtil = new JwtUtil(SECRET, 900000, 604800000);
+    // Note: username is a display name only; UserDetails.getUsername() returns email
     user =
         User.builder()
             .id(UUID.randomUUID())

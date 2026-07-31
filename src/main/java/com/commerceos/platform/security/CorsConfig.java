@@ -1,4 +1,4 @@
-package com.commerceos.iam.config;
+package com.commerceos.platform.security;
 
 import java.util.List;
 import org.springframework.context.annotation.Bean;

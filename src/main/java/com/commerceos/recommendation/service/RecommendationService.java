@@ -1,7 +1,7 @@
 package com.commerceos.recommendation.service;
 
-import com.commerceos.iam.exception.BusinessException;
 import com.commerceos.inventory.event.LowStockEvent;
+import com.commerceos.platform.exception.BusinessException;
 import com.commerceos.recommendation.calculator.DemandForecastCalculator;
 import com.commerceos.recommendation.calculator.SupplierRanker;
 import com.commerceos.recommendation.client.LlmInsightService;
@@ -17,11 +17,15 @@ import com.commerceos.supplier.repository.SupplierProductRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +42,8 @@ public class RecommendationService {
 
   private final DemandForecastCalculator forecastCalculator = new DemandForecastCalculator();
   private final SupplierRanker supplierRanker = new SupplierRanker();
+
+  // ---- Generate Recommendations ----
 
   @Transactional
   public PurchaseRecommendation generateForLowStockEvent(LowStockEvent event) {
@@ -64,15 +70,19 @@ public class RecommendationService {
           "NO_SUPPLIER_FOUND", "No eligible suppliers found for product ID: " + productId, 404);
     }
 
+    // Batch fetch all supplier performances in a single query (fixes N+1)
+    List<UUID> supplierIds = supplierProducts.stream().map(sp -> sp.getSupplier().getId()).toList();
+    Map<UUID, SupplierPerformance> perfMap =
+        supplierPerformanceRepository.findAllBySupplierIdIn(supplierIds).stream()
+            .collect(Collectors.toMap(p -> p.getSupplier().getId(), Function.identity()));
+
     List<SupplierRanker.CandidateSupplier> candidateSuppliers =
         supplierProducts.stream()
             .map(
                 sp -> {
-                  Optional<SupplierPerformance> perf =
-                      supplierPerformanceRepository.findBySupplierId(sp.getSupplier().getId());
+                  SupplierPerformance perf = perfMap.get(sp.getSupplier().getId());
                   BigDecimal fulfillmentRate =
-                      perf.map(SupplierPerformance::getFulfillmentRate)
-                          .orElse(new BigDecimal("90.00"));
+                      perf != null ? perf.getFulfillmentRate() : new BigDecimal("90.00");
                   return new SupplierRanker.CandidateSupplier(
                       sp.getSupplier().getId(),
                       sp.getUnitCost(),
@@ -138,9 +148,11 @@ public class RecommendationService {
     return saved;
   }
 
+  // ---- List / Get ----
+
   @Transactional(readOnly = true)
-  public List<PurchaseRecommendation> listAll() {
-    return recommendationRepository.findAll();
+  public Page<PurchaseRecommendation> listAll(Pageable pageable) {
+    return recommendationRepository.findAllByOrderByCreatedAtDesc(pageable);
   }
 
   @Transactional(readOnly = true)
@@ -154,9 +166,16 @@ public class RecommendationService {
   }
 
   @Transactional(readOnly = true)
-  public List<PurchaseRecommendation> getByProductId(UUID productId) {
-    return recommendationRepository.findByProductId(productId);
+  public Page<PurchaseRecommendation> getByProductId(UUID productId, Pageable pageable) {
+    return recommendationRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
   }
+
+  @Transactional(readOnly = true)
+  public Page<PurchaseRecommendation> getByStatus(String status, Pageable pageable) {
+    return recommendationRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+  }
+
+  // ---- Actions ----
 
   @Transactional
   public PurchaseRecommendation dismiss(UUID id) {

@@ -1,6 +1,5 @@
-package com.commerceos.iam.util;
+package com.commerceos.platform.security;
 
-import com.commerceos.iam.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -12,6 +11,12 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * Stateless JWT utility for generating and validating access and refresh tokens.
+ *
+ * <p>The JWT subject is the user's email (i.e. {@code UserDetails.getUsername()} returns email in
+ * this system). This class has <strong>no</strong> dependency on any domain entity.
+ */
 public class JwtUtil {
 
   private final SecretKey signInKey;
@@ -39,18 +44,18 @@ public class JwtUtil {
   }
 
   public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    String subject = resolveSubject(userDetails);
+    String subject = userDetails.getUsername();
     return buildToken(extraClaims, subject, accessTokenExpirationMs);
   }
 
   public String generateRefreshToken(UserDetails userDetails) {
-    String subject = resolveSubject(userDetails);
+    String subject = userDetails.getUsername();
     return buildToken(new HashMap<>(), subject, refreshTokenExpirationMs);
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(resolveSubject(userDetails))) && !isTokenExpired(token);
+    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
   }
 
   private boolean isTokenExpired(String token) {
@@ -73,12 +78,5 @@ public class JwtUtil {
         .expiration(new Date(System.currentTimeMillis() + expirationMs))
         .signWith(signInKey)
         .compact();
-  }
-
-  private String resolveSubject(UserDetails userDetails) {
-    if (userDetails instanceof User user) {
-      return user.getEmail();
-    }
-    return userDetails.getUsername();
   }
 }
