@@ -1,8 +1,8 @@
 package com.commerceos.supplier.mapper;
 
-import com.commerceos.supplier.dto.response.SupplierPerformanceResponse;
-import com.commerceos.supplier.dto.response.SupplierProductResponse;
-import com.commerceos.supplier.dto.response.SupplierResponse;
+import com.commerceos.supplier.dto.response.SupplierPerformanceResponseDto;
+import com.commerceos.supplier.dto.response.SupplierProductResponseDto;
+import com.commerceos.supplier.dto.response.SupplierResponseDto;
 import com.commerceos.supplier.entity.Supplier;
 import com.commerceos.supplier.entity.SupplierPerformance;
 import com.commerceos.supplier.entity.SupplierProduct;
@@ -17,51 +17,48 @@ public class SupplierMapper {
 
   private final ModelMapper modelMapper;
 
-  public SupplierResponse toSupplierResponse(Supplier supplier, SupplierPerformance performance) {
+  public SupplierResponseDto toSupplierResponse(Supplier supplier, SupplierPerformance performance) {
     if (supplier == null) return null;
-    SupplierPerformanceResponse perfResponse =
+    SupplierPerformanceResponseDto perfResponse =
         performance != null ? toPerformanceResponse(performance) : null;
-    return new SupplierResponse(
+    return new SupplierResponseDto(
         supplier.getId(),
         supplier.getName(),
         supplier.getContactEmail(),
         supplier.getPhone(),
         supplier.getAddress(),
         supplier.getPaymentTerms(),
-        supplier.isActive(),
         perfResponse,
         supplier.getCreatedAt(),
         supplier.getUpdatedAt());
   }
 
-  public SupplierProductResponse toSupplierProductResponse(SupplierProduct supplierProduct) {
-    SupplierProductResponse response =
-        new SupplierProductResponse(
-            supplierProduct.getId(),
-            supplierProduct.getSupplier() != null ? supplierProduct.getSupplier().getId() : null,
-            supplierProduct.getSupplier() != null ? supplierProduct.getSupplier().getName() : null,
-            supplierProduct.getProductId(),
-            supplierProduct.getUnitCost(),
-            supplierProduct.getLeadTimeDays(),
-            supplierProduct.isPrimary(),
-            supplierProduct.getCreatedAt(),
-            supplierProduct.getUpdatedAt());
-    return response;
+  public SupplierProductResponseDto toSupplierProductResponse(SupplierProduct supplierProduct) {
+    return new SupplierProductResponseDto(
+        supplierProduct.getId(),
+        supplierProduct.getSupplier() != null ? supplierProduct.getSupplier().getId() : null,
+        supplierProduct.getSupplier() != null ? supplierProduct.getSupplier().getName() : null,
+        supplierProduct.getProductId(),
+        supplierProduct.getUnitCost(),
+        supplierProduct.getLeadTimeDays(),
+        supplierProduct.isPrimary(),
+        supplierProduct.getCreatedAt());
   }
 
-  public List<SupplierProductResponse> toSupplierProductResponseList(
+  public List<SupplierProductResponseDto> toSupplierProductResponseList(
       List<SupplierProduct> supplierProducts) {
     return supplierProducts.stream().map(this::toSupplierProductResponse).toList();
   }
 
-  public SupplierPerformanceResponse toPerformanceResponse(SupplierPerformance performance) {
+  public SupplierPerformanceResponseDto toPerformanceResponse(SupplierPerformance performance) {
     if (performance == null) return null;
-    return new SupplierPerformanceResponse(
+    return new SupplierPerformanceResponseDto(
         performance.getId(),
         performance.getSupplier() != null ? performance.getSupplier().getId() : null,
         performance.getTotalOrdersFulfilled(),
         performance.getOnTimeDeliveries(),
+        0,
         performance.getFulfillmentRate(),
-        performance.getAvgLeadTimeDays());
+        performance.getUpdatedAt());
   }
 }

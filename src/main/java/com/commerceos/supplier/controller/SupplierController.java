@@ -1,12 +1,12 @@
 package com.commerceos.supplier.controller;
 
+import com.commerceos.common.dto.ApiResponse;
 import com.commerceos.common.dto.PagedResponse;
-import com.commerceos.iam.dto.ApiResponse;
-import com.commerceos.supplier.dto.request.CreateSupplierRequest;
-import com.commerceos.supplier.dto.request.MapSupplierProductRequest;
-import com.commerceos.supplier.dto.request.UpdateSupplierRequest;
-import com.commerceos.supplier.dto.response.SupplierProductResponse;
-import com.commerceos.supplier.dto.response.SupplierResponse;
+import com.commerceos.supplier.dto.request.CreateSupplierRequestDto;
+import com.commerceos.supplier.dto.request.MapSupplierProductRequestDto;
+import com.commerceos.supplier.dto.request.UpdateSupplierRequestDto;
+import com.commerceos.supplier.dto.response.SupplierProductResponseDto;
+import com.commerceos.supplier.dto.response.SupplierResponseDto;
 import com.commerceos.supplier.service.SupplierService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -27,31 +27,31 @@ public class SupplierController {
   private final SupplierService supplierService;
 
   @PostMapping
-  public ResponseEntity<ApiResponse<SupplierResponse>> createSupplier(
-      @Valid @RequestBody CreateSupplierRequest request) {
-    SupplierResponse supplier = supplierService.createSupplier(request);
+  public ResponseEntity<ApiResponse<SupplierResponseDto>> createSupplier(
+      @Valid @RequestBody CreateSupplierRequestDto request) {
+    SupplierResponseDto supplier = supplierService.createSupplier(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.success("Supplier created successfully", supplier));
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<PagedResponse<SupplierResponse>>> listSuppliers(
+  public ResponseEntity<ApiResponse<PagedResponse<SupplierResponseDto>>> listSuppliers(
       @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
           Pageable pageable) {
-    PagedResponse<SupplierResponse> result = supplierService.listSuppliers(pageable);
+    PagedResponse<SupplierResponseDto> result = supplierService.listSuppliers(pageable);
     return ResponseEntity.ok(ApiResponse.success("Suppliers fetched successfully", result));
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<SupplierResponse>> getSupplier(@PathVariable UUID id) {
-    SupplierResponse supplier = supplierService.getSupplier(id);
+  public ResponseEntity<ApiResponse<SupplierResponseDto>> getSupplier(@PathVariable UUID id) {
+    SupplierResponseDto supplier = supplierService.getSupplier(id);
     return ResponseEntity.ok(ApiResponse.success("Supplier fetched successfully", supplier));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<SupplierResponse>> updateSupplier(
-      @PathVariable UUID id, @Valid @RequestBody UpdateSupplierRequest request) {
-    SupplierResponse supplier = supplierService.updateSupplier(id, request);
+  public ResponseEntity<ApiResponse<SupplierResponseDto>> updateSupplier(
+      @PathVariable UUID id, @Valid @RequestBody UpdateSupplierRequestDto request) {
+    SupplierResponseDto supplier = supplierService.updateSupplier(id, request);
     return ResponseEntity.ok(ApiResponse.success("Supplier updated successfully", supplier));
   }
 
@@ -64,9 +64,9 @@ public class SupplierController {
   // ---- Supplier Product Mappings ----
 
   @PostMapping("/{id}/products")
-  public ResponseEntity<ApiResponse<SupplierProductResponse>> mapProduct(
-      @PathVariable UUID id, @Valid @RequestBody MapSupplierProductRequest request) {
-    SupplierProductResponse response = supplierService.mapProduct(id, request);
+  public ResponseEntity<ApiResponse<SupplierProductResponseDto>> mapProduct(
+      @PathVariable UUID id, @Valid @RequestBody MapSupplierProductRequestDto request) {
+    SupplierProductResponseDto response = supplierService.mapProduct(id, request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.success("Product mapped to supplier successfully", response));
   }
@@ -79,17 +79,17 @@ public class SupplierController {
   }
 
   @GetMapping("/{id}/products")
-  public ResponseEntity<ApiResponse<List<SupplierProductResponse>>> listSupplierProducts(
+  public ResponseEntity<ApiResponse<List<SupplierProductResponseDto>>> listSupplierProducts(
       @PathVariable UUID id) {
-    List<SupplierProductResponse> products = supplierService.listSupplierProducts(id);
+    List<SupplierProductResponseDto> products = supplierService.listSupplierProducts(id);
     return ResponseEntity.ok(
         ApiResponse.success("Supplier products fetched successfully", products));
   }
 
   @GetMapping("/products/{productId}/eligible")
-  public ResponseEntity<ApiResponse<List<SupplierProductResponse>>> getEligibleSuppliers(
+  public ResponseEntity<ApiResponse<List<SupplierProductResponseDto>>> getEligibleSuppliers(
       @PathVariable UUID productId) {
-    List<SupplierProductResponse> suppliers = supplierService.getEligibleSuppliers(productId);
+    List<SupplierProductResponseDto> suppliers = supplierService.getEligibleSuppliers(productId);
     return ResponseEntity.ok(
         ApiResponse.success("Eligible suppliers fetched successfully", suppliers));
   }

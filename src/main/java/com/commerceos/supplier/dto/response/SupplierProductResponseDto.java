@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record SupplierProductResponse(
+public record SupplierProductResponseDto(
     UUID id,
     UUID supplierId,
     String supplierName,
@@ -12,5 +12,4 @@ public record SupplierProductResponse(
     BigDecimal unitCost,
     int leadTimeDays,
     boolean isPrimary,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt) {}
+    LocalDateTime createdAt) {}
