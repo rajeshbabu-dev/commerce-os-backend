@@ -4,17 +4,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.commerceos.iam.dto.request.CreateUserRequest;
-import com.commerceos.iam.dto.request.LoginRequest;
-import com.commerceos.iam.dto.request.SignupRequest;
+import com.commerceos.iam.dto.request.CreateUserRequestDto;
+import com.commerceos.iam.dto.request.LoginRequestDto;
+import com.commerceos.iam.dto.request.SignupRequestDto;
 import com.commerceos.iam.entity.Role;
 import com.commerceos.iam.entity.User;
-import com.commerceos.iam.exception.BusinessException;
 import com.commerceos.iam.redis.LoginRateLimiter;
 import com.commerceos.iam.redis.RefreshTokenRedisService;
 import com.commerceos.iam.repository.RoleRepository;
 import com.commerceos.iam.repository.UserRepository;
-import com.commerceos.iam.util.JwtUtil;
+import com.commerceos.iam.service.impl.AuthServiceImpl;
+import com.commerceos.platform.exception.BusinessException;
+import com.commerceos.platform.security.JwtUtil;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,7 +42,7 @@ class AuthServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private AuthenticationManager authenticationManager;
 
-  @InjectMocks private AuthService authService;
+  @InjectMocks private AuthServiceImpl authService;
 
   @BeforeEach
   void setUp() {
@@ -52,8 +53,8 @@ class AuthServiceTest {
   @Test
   @DisplayName("createUser success when admin creates user")
   void createUser_Success() {
-    CreateUserRequest req =
-        new CreateUserRequest("opsuser", "ops@example.com", "Password123", "OPS_EXECUTIVE");
+    CreateUserRequestDto req =
+        new CreateUserRequestDto("opsuser", "ops@example.com", "Password123", "OPS_EXECUTIVE");
     Role role = Role.builder().id(UUID.randomUUID()).name("OPS_EXECUTIVE").build();
     User savedUser =
         User.builder()
@@ -72,14 +73,14 @@ class AuthServiceTest {
     User result = authService.createUser(req);
 
     assertNotNull(result);
-    assertEquals("opsuser", result.getUsername());
+    assertEquals("opsuser", result.getDisplayName());
     assertEquals("ops@example.com", result.getEmail());
   }
 
   @Test
   @DisplayName("signUp throws exception if email exists")
   void signUp_DuplicateEmail() {
-    SignupRequest req = new SignupRequest("user1", "existing@example.com", "Password123");
+    SignupRequestDto req = new SignupRequestDto("user1", "existing@example.com", "Password123");
     when(loginRateLimiter.isSignupBlocked("127.0.0.1")).thenReturn(false);
     when(userRepository.existsByEmail(req.email())).thenReturn(true);
 
@@ -89,7 +90,7 @@ class AuthServiceTest {
   @Test
   @DisplayName("login records failed attempt on BadCredentialsException")
   void login_FailedAttempt() {
-    LoginRequest req = new LoginRequest("test@example.com", "wrongpass");
+    LoginRequestDto req = new LoginRequestDto("test@example.com", "wrongpass");
     when(loginRateLimiter.isBlocked(req.email())).thenReturn(false);
     when(authenticationManager.authenticate(any()))
         .thenThrow(new BadCredentialsException("Invalid"));

@@ -67,6 +67,27 @@ public class User implements UserDetails {
 
   // -- UserDetails implementation -----------------------------------------------
 
+  /**
+   * Returns the display name / handle stored in the {@code username} column.
+   *
+   * <p>This is <strong>not</strong> the Spring Security username. Use {@link #getUsername()} for
+   * the authentication identifier (email).
+   */
+  public String getDisplayName() {
+    return username;
+  }
+
+  /**
+   * Returns the email as the Spring Security username.
+   *
+   * <p>In this system, email is the authentication identifier used for login and JWT subjects. The
+   * {@code username} column is a display name / handle only.
+   */
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     Set<GrantedAuthority> authorities = new HashSet<>();

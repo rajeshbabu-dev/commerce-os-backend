@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.commerceos.iam.dto.request.SignupRequest;
+import com.commerceos.iam.dto.request.SignupRequestDto;
 import com.commerceos.iam.entity.User;
 import com.commerceos.iam.service.AuthService;
 import java.util.Set;
@@ -29,7 +29,7 @@ class AuthControllerTest {
   @Test
   @DisplayName("signUp endpoint delegates to authService and returns 201 Created")
   void signUp_Success() {
-    SignupRequest req = new SignupRequest("john_doe", "john@example.com", "Password123");
+    SignupRequestDto req = new SignupRequestDto("john_doe", "john@example.com", "Password123");
     User savedUser =
         User.builder()
             .id(UUID.randomUUID())

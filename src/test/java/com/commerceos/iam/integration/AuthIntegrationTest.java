@@ -2,8 +2,8 @@ package com.commerceos.iam.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.commerceos.iam.dto.request.LoginRequest;
-import com.commerceos.iam.dto.response.AuthResponse;
+import com.commerceos.iam.dto.request.LoginRequestDto;
+import com.commerceos.iam.dto.response.AuthResponseDto;
 import com.commerceos.iam.service.AuthService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +20,8 @@ class AuthIntegrationTest {
   @Test
   @DisplayName("Default admin can log in")
   void defaultAdminLogin() {
-    LoginRequest loginRequest = new LoginRequest("admin@commerceos.com", "admin123");
-    AuthResponse response = authService.login(loginRequest);
+    LoginRequestDto loginRequest = new LoginRequestDto("admin@commerceos.com", "admin123");
+    AuthResponseDto response = authService.login(loginRequest);
 
     assertNotNull(response.accessToken());
     assertNotNull(response.refreshToken());

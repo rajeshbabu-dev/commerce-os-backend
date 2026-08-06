@@ -1,10 +1,12 @@
 package com.commerceos.inventory.event;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Plain domain class — no Spring annotations, unit-testable with zero Spring context. Per
- * TICKET-06: determines whether a stock adjustment has caused the stock level to cross (drop to or
- * below) the reorder point.
+ * Domain calculator component managed by Spring DI. Per TICKET-06: determines whether a stock
+ * adjustment has caused the stock level to cross (drop to or below) the reorder point.
  */
+@Component
 public class ReorderPointCalculator {
 
   /**

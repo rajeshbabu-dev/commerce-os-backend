@@ -1,12 +1,12 @@
 package com.commerceos.iam.controller;
 
 import com.commerceos.common.dto.ApiResponse;
-import com.commerceos.iam.dto.request.CreateUserRequest;
-import com.commerceos.iam.dto.request.LoginRequest;
-import com.commerceos.iam.dto.request.RefreshTokenRequest;
-import com.commerceos.iam.dto.request.SignupRequest;
-import com.commerceos.iam.dto.response.AuthResponse;
-import com.commerceos.iam.dto.response.UserResponse;
+import com.commerceos.iam.dto.request.CreateUserRequestDto;
+import com.commerceos.iam.dto.request.LoginRequestDto;
+import com.commerceos.iam.dto.request.RefreshTokenRequestDto;
+import com.commerceos.iam.dto.request.SignupRequestDto;
+import com.commerceos.iam.dto.response.AuthResponseDto;
+import com.commerceos.iam.dto.response.UserResponseDto;
 import com.commerceos.iam.entity.User;
 import com.commerceos.iam.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,29 +26,32 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping({"/auth/signup", "/auth/register"})
-  public ResponseEntity<ApiResponse<UserResponse>> signUp(
-      @Valid @RequestBody SignupRequest request, HttpServletRequest servletRequest) {
+  public ResponseEntity<ApiResponse<UserResponseDto>> signUp(
+      @Valid @RequestBody SignupRequestDto request, HttpServletRequest servletRequest) {
     String clientIp = extractClientIp(servletRequest);
     User user = authService.signUp(request, clientIp);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.success("User registered successfully", UserResponse.fromEntity(user)));
+        .body(
+            ApiResponse.success("User registered successfully", UserResponseDto.fromEntity(user)));
   }
 
   @PostMapping("/auth/login")
-  public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-    AuthResponse response = authService.login(request);
+  public ResponseEntity<ApiResponse<AuthResponseDto>> login(
+      @Valid @RequestBody LoginRequestDto request) {
+    AuthResponseDto response = authService.login(request);
     return ResponseEntity.ok(ApiResponse.success("Login successful", response));
   }
 
   @PostMapping("/auth/refresh")
-  public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
-      @Valid @RequestBody RefreshTokenRequest request) {
-    AuthResponse response = authService.refreshToken(request.refreshToken());
+  public ResponseEntity<ApiResponse<AuthResponseDto>> refreshToken(
+      @Valid @RequestBody RefreshTokenRequestDto request) {
+    AuthResponseDto response = authService.refreshToken(request.refreshToken());
     return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
   }
 
   @PostMapping("/auth/logout")
-  public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
+  public ResponseEntity<ApiResponse<Void>> logout(
+      @Valid @RequestBody RefreshTokenRequestDto request) {
     authService.logout(request.refreshToken());
     return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
   }
@@ -60,20 +63,21 @@ public class AuthController {
   }
 
   @GetMapping("/auth/me")
-  public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+  public ResponseEntity<ApiResponse<UserResponseDto>> getCurrentUser(
       @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(
-        ApiResponse.success("User profile fetched successfully", UserResponse.fromEntity(user)));
+        ApiResponse.success("User profile fetched successfully", UserResponseDto.fromEntity(user)));
   }
 
   @PostMapping("/admin/users")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<ApiResponse<UserResponse>> createUser(
-      @Valid @RequestBody CreateUserRequest request) {
+  public ResponseEntity<ApiResponse<UserResponseDto>> createUser(
+      @Valid @RequestBody CreateUserRequestDto request) {
     User createdUser = authService.createUser(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(
-            ApiResponse.success("User created successfully", UserResponse.fromEntity(createdUser)));
+            ApiResponse.success(
+                "User created successfully", UserResponseDto.fromEntity(createdUser)));
   }
 
   private String extractClientIp(HttpServletRequest request) {
