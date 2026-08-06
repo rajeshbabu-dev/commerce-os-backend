@@ -40,7 +40,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_MAIL_HOST: mailhog
       SPRING_MAIL_PORT: "1025"
-      JWT_SECRET: vNhR5pdmd0I4+DnUlqFDH2MhGWGsbwoNg6icSzNHXnc=
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in .env file}"
       JWT_ACCESS_TOKEN_TTL: "900000"
       JWT_REFRESH_TOKEN_TTL: "604800000"
     depends_on:
