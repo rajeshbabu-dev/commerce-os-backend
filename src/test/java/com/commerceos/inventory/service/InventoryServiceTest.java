@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.commerceos.inventory.calculator.ReorderPointCalculator;
 import com.commerceos.inventory.dto.request.AdjustStockRequestDto;
 import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
 import com.commerceos.inventory.entity.StockMovement;
-import com.commerceos.inventory.event.ReorderPointCalculator;
 import com.commerceos.inventory.repository.ProductRepository;
 import com.commerceos.inventory.repository.StockItemRepository;
 import com.commerceos.inventory.repository.StockMovementRepository;
