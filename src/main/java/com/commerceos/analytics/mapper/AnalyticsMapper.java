@@ -3,28 +3,23 @@ package com.commerceos.analytics.mapper;
 import com.commerceos.analytics.dto.response.EventLogResponseDto;
 import com.commerceos.analytics.entity.DomainEventLog;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AnalyticsMapper {
 
+  private final ModelMapper modelMapper;
+
   public EventLogResponseDto toEventLogResponse(DomainEventLog eventLog) {
-    return new EventLogResponseDto(
-        eventLog.getId(),
-        eventLog.getEventType(),
-        eventLog.getSourceExchange(),
-        eventLog.getCorrelationId(),
-        eventLog.getProductId(),
-        eventLog.getEntityId(),
-        eventLog.getActorId(),
-        eventLog.getAmount(),
-        eventLog.getConfidenceScore(),
-        eventLog.getDecision(),
-        eventLog.getPayload(),
-        eventLog.getOccurredAt());
+    if (eventLog == null) return null;
+    return modelMapper.map(eventLog, EventLogResponseDto.class);
   }
 
   public List<EventLogResponseDto> toEventLogResponseList(List<DomainEventLog> eventLogs) {
+    if (eventLogs == null) return List.of();
     return eventLogs.stream().map(this::toEventLogResponse).toList();
   }
 }

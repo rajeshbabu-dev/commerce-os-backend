@@ -7,10 +7,15 @@ import com.commerceos.supplier.entity.Supplier;
 import com.commerceos.supplier.entity.SupplierPerformance;
 import com.commerceos.supplier.entity.SupplierProduct;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SupplierMapper {
+
+  private final ModelMapper modelMapper;
 
   public SupplierResponseDto toSupplierResponse(
       Supplier supplier, SupplierPerformance performance) {
