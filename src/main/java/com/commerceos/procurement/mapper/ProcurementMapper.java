@@ -7,15 +7,10 @@ import com.commerceos.procurement.entity.PoStatusHistory;
 import com.commerceos.procurement.entity.PurchaseOrder;
 import com.commerceos.procurement.entity.PurchaseOrderItem;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class ProcurementMapper {
-
-  private final ModelMapper modelMapper;
 
   public PoResponseDto toPoResponse(PurchaseOrder po) {
     List<PoItemResponseDto> itemDtos =

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,9 @@ public class PoCreatedListener {
   private final ObjectMapper objectMapper;
 
   @RabbitListener(queues = RabbitMQProcurementConfig.PO_CREATED_QUEUE)
-  public void handlePoCreated(String message) {
+  public void handlePoCreated(Message message) {
     try {
-      JsonNode event = objectMapper.readTree(message);
+      JsonNode event = objectMapper.readTree(message.getBody());
       String poId = event.get("poId").asText();
       String submittedBy = event.get("submittedBy").asText();
 

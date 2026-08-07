@@ -5,15 +5,10 @@ import com.commerceos.workflow.dto.response.ApprovalRequestResponseDto;
 import com.commerceos.workflow.entity.ApprovalAction;
 import com.commerceos.workflow.entity.ApprovalRequest;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class WorkflowMapper {
-
-  private final ModelMapper modelMapper;
 
   public ApprovalRequestResponseDto toApprovalRequestResponse(ApprovalRequest request) {
     return new ApprovalRequestResponseDto(

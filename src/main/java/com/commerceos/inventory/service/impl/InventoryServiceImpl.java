@@ -17,7 +17,6 @@ import com.commerceos.inventory.service.InventoryService;
 import com.commerceos.platform.exception.DuplicateResourceException;
 import com.commerceos.platform.exception.InsufficientStockException;
 import com.commerceos.platform.exception.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +40,6 @@ public class InventoryServiceImpl implements InventoryService {
   private final StockItemRepository stockItemRepository;
   private final StockMovementRepository stockMovementRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final ObjectMapper objectMapper;
   private final ReorderPointCalculator reorderPointCalculator;
 
   // ---- Product CRUD ----
@@ -221,9 +219,8 @@ public class InventoryServiceImpl implements InventoryService {
             item.getReorderPoint(),
             LocalDateTime.now());
     try {
-      String json = objectMapper.writeValueAsString(event);
       rabbitTemplate.convertAndSend(
-          RabbitMQInventoryConfig.EXCHANGE, RabbitMQInventoryConfig.ROUTING_KEY, json);
+          RabbitMQInventoryConfig.EXCHANGE, RabbitMQInventoryConfig.ROUTING_KEY, event);
       log.info("Published low-stock event for product: {}", item.getProduct().getSku());
     } catch (Exception e) {
       log.error("Failed to publish low-stock event for product: {}", item.getProduct().getSku(), e);
