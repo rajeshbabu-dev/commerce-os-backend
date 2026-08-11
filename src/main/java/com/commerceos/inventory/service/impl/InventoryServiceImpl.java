@@ -69,12 +69,14 @@ public class InventoryServiceImpl implements InventoryService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   @PreAuthorize("hasAuthority('inventory:read')")
   public Page<Product> listProducts(Pageable pageable) {
     return productRepository.findAll(pageable);
   }
 
   @Override
+  @Transactional(readOnly = true)
   @PreAuthorize("hasAuthority('inventory:read')")
   public Product getProduct(UUID id) {
     return productRepository
@@ -131,12 +133,14 @@ public class InventoryServiceImpl implements InventoryService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   @PreAuthorize("hasAuthority('inventory:read')")
   public Page<StockItem> listStockItems(Pageable pageable) {
     return stockItemRepository.findAll(pageable);
   }
 
   @Override
+  @Transactional(readOnly = true)
   @PreAuthorize("hasAuthority('inventory:read')")
   public StockItem getStockItem(UUID id) {
     return stockItemRepository
@@ -203,6 +207,7 @@ public class InventoryServiceImpl implements InventoryService {
   // ---- Stock Movement History ----
 
   @Override
+  @Transactional(readOnly = true)
   @PreAuthorize("hasAuthority('inventory:read')")
   public List<StockMovement> getStockMovements(UUID stockItemId) {
     return stockMovementRepository.findByStockItemIdOrderByCreatedAtDesc(stockItemId);

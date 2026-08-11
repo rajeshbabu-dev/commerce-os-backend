@@ -156,7 +156,7 @@ public class RecommendationServiceImpl implements RecommendationService {
   @Override
   @Transactional(readOnly = true)
   public Page<PurchaseRecommendation> listAll(Pageable pageable) {
-    return recommendationRepository.findAllByOrderByCreatedAtDesc(pageable);
+    return recommendationRepository.findAll(pageable);
   }
 
   @Override
@@ -173,13 +173,13 @@ public class RecommendationServiceImpl implements RecommendationService {
   @Override
   @Transactional(readOnly = true)
   public Page<PurchaseRecommendation> getByProductId(UUID productId, Pageable pageable) {
-    return recommendationRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
+    return recommendationRepository.findByProductId(productId, pageable);
   }
 
   @Override
   @Transactional(readOnly = true)
   public Page<PurchaseRecommendation> getByStatus(String status, Pageable pageable) {
-    return recommendationRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+    return recommendationRepository.findByStatus(status, pageable);
   }
 
   // ---- Actions ----
