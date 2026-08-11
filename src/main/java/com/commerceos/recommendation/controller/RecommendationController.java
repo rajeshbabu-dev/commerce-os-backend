@@ -43,9 +43,13 @@ public class RecommendationController {
   @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_MANAGER', 'OPS_EXECUTIVE', 'VIEWER')")
   public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecommendationResponseDto>>>
       listRecommendations(
+          @RequestParam(required = false) String status,
           @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
               Pageable pageable) {
-    Page<PurchaseRecommendation> page = recommendationService.listAll(pageable);
+    Page<PurchaseRecommendation> page =
+        status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)
+            ? recommendationService.getByStatus(status, pageable)
+            : recommendationService.listAll(pageable);
     PagedResponse<PurchaseRecommendationResponseDto> pagedResponse =
         PagedResponse.from(page, recommendationMapper.toResponseList(page.getContent()));
     return ResponseEntity.ok(

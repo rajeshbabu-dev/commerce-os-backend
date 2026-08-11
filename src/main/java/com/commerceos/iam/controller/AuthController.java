@@ -11,6 +11,8 @@ import com.commerceos.iam.entity.User;
 import com.commerceos.iam.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +71,16 @@ public class AuthController {
         ApiResponse.success("User profile fetched successfully", UserResponseDto.fromEntity(user)));
   }
 
+  @GetMapping("/health")
+  public ResponseEntity<ApiResponse<Map<String, Object>>> health() {
+    Map<String, Object> details =
+        Map.of(
+            "status", "UP",
+            "service", "commerceos-backend",
+            "timestamp", java.time.Instant.now().toString());
+    return ResponseEntity.ok(ApiResponse.success("Service is healthy", details));
+  }
+
   @PostMapping("/admin/users")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<UserResponseDto>> createUser(
@@ -78,6 +90,13 @@ public class AuthController {
         .body(
             ApiResponse.success(
                 "User created successfully", UserResponseDto.fromEntity(createdUser)));
+  }
+
+  @GetMapping("/admin/users")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<List<UserResponseDto>>> listUsers() {
+    List<UserResponseDto> users = authService.listUsers();
+    return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", users));
   }
 
   private String extractClientIp(HttpServletRequest request) {

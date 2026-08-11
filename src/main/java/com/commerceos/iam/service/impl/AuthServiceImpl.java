@@ -4,6 +4,7 @@ import com.commerceos.iam.dto.request.CreateUserRequestDto;
 import com.commerceos.iam.dto.request.LoginRequestDto;
 import com.commerceos.iam.dto.request.SignupRequestDto;
 import com.commerceos.iam.dto.response.AuthResponseDto;
+import com.commerceos.iam.dto.response.UserResponseDto;
 import com.commerceos.iam.entity.Role;
 import com.commerceos.iam.entity.User;
 import com.commerceos.iam.redis.LoginRateLimiter;
@@ -16,6 +17,7 @@ import com.commerceos.platform.exception.InvalidCredentialsException;
 import com.commerceos.platform.exception.RateLimitExceededException;
 import com.commerceos.platform.exception.ResourceNotFoundException;
 import com.commerceos.platform.security.JwtUtil;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -204,6 +206,11 @@ public class AuthServiceImpl implements AuthService {
   public void logoutAll(UUID userId) {
     log.info("Logout all sessions attempt for user ID: {}", userId);
     refreshTokenRedisService.revokeAllByUserId(userId);
+  }
+
+  @Override
+  public List<UserResponseDto> listUsers() {
+    return userRepository.findAll().stream().map(UserResponseDto::fromEntity).toList();
   }
 
   private AuthResponseDto generateAuthResponse(User user) {

@@ -16,7 +16,6 @@ import com.commerceos.procurement.repository.PurchaseOrderRepository;
 import com.commerceos.procurement.service.ProcurementService;
 import com.commerceos.recommendation.entity.PurchaseRecommendation;
 import com.commerceos.recommendation.repository.PurchaseRecommendationRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +39,6 @@ public class ProcurementServiceImpl implements ProcurementService {
   private final PoStatusHistoryRepository poStatusHistoryRepository;
   private final PurchaseRecommendationRepository recommendationRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final ObjectMapper objectMapper;
 
   // ---- Create PO ----
 
@@ -272,11 +270,10 @@ public class ProcurementServiceImpl implements ProcurementService {
     try {
       PoCreatedEvent event =
           new PoCreatedEvent(po.getId(), po.getTotalAmount(), userId, LocalDateTime.now());
-      String json = objectMapper.writeValueAsString(event);
       rabbitTemplate.convertAndSend(
           RabbitMQProcurementConfig.PROCUREMENT_EXCHANGE,
           RabbitMQProcurementConfig.PO_CREATED_ROUTING_KEY,
-          json);
+          event);
       log.info("Published procurement.po-created event for PO: {}", po.getId());
     } catch (Exception e) {
       log.error("Failed to publish procurement.po-created event for PO: {}", po.getId(), e);

@@ -18,6 +18,7 @@ public class ProcurementMapper {
   private final ModelMapper modelMapper;
 
   public PoResponseDto toPoResponse(PurchaseOrder po) {
+    if (po == null) return null;
     List<PoItemResponseDto> itemDtos =
         po.getItems() != null
             ? po.getItems().stream().map(this::toPoItemResponse).toList()
@@ -35,30 +36,23 @@ public class ProcurementMapper {
   }
 
   public List<PoResponseDto> toPoResponseList(List<PurchaseOrder> pos) {
+    if (pos == null) return List.of();
     return pos.stream().map(this::toPoResponse).toList();
   }
 
   public PoItemResponseDto toPoItemResponse(PurchaseOrderItem item) {
-    return new PoItemResponseDto(
-        item.getId(),
-        item.getProductId(),
-        item.getQuantity(),
-        item.getUnitPrice(),
-        item.getSubtotal());
+    if (item == null) return null;
+    return modelMapper.map(item, PoItemResponseDto.class);
   }
 
   public PoStatusHistoryResponseDto toStatusHistoryResponse(PoStatusHistory history) {
-    return new PoStatusHistoryResponseDto(
-        history.getId(),
-        history.getOldStatus(),
-        history.getNewStatus(),
-        history.getChangedBy(),
-        history.getReason(),
-        history.getChangedAt());
+    if (history == null) return null;
+    return modelMapper.map(history, PoStatusHistoryResponseDto.class);
   }
 
   public List<PoStatusHistoryResponseDto> toStatusHistoryResponseList(
       List<PoStatusHistory> histories) {
+    if (histories == null) return List.of();
     return histories.stream().map(this::toStatusHistoryResponse).toList();
   }
 }

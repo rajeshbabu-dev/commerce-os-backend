@@ -1,4 +1,4 @@
-package com.commerceos.inventory.event;
+package com.commerceos.inventory.calculator;
 
 import static org.junit.jupiter.api.Assertions.*;
 

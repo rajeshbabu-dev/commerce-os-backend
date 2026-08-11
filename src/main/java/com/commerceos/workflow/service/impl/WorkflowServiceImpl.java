@@ -9,7 +9,6 @@ import com.commerceos.workflow.entity.ApprovalRequest;
 import com.commerceos.workflow.repository.ApprovalActionRepository;
 import com.commerceos.workflow.repository.ApprovalRequestRepository;
 import com.commerceos.workflow.service.WorkflowService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -32,7 +31,6 @@ public class WorkflowServiceImpl implements WorkflowService {
   private final ApprovalRequestRepository approvalRequestRepository;
   private final ApprovalActionRepository approvalActionRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final ObjectMapper objectMapper;
 
   // ---- Create Approval Request ----
 
@@ -167,11 +165,10 @@ public class WorkflowServiceImpl implements WorkflowService {
       event.put("decision", "APPROVE".equals(action) ? "APPROVED" : "REJECTED");
       event.put("decidedBy", null);
       event.put("decidedAt", LocalDateTime.now());
-      String json = objectMapper.writeValueAsString(event);
       rabbitTemplate.convertAndSend(
           RabbitMQProcurementConfig.WORKFLOW_EXCHANGE,
           RabbitMQProcurementConfig.APPROVAL_DECIDED_ROUTING_KEY,
-          json);
+          event);
       log.info("Published workflow.approval-decided event for request: {}", request.getId());
     } catch (Exception e) {
       log.error(

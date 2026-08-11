@@ -14,11 +14,13 @@ public class RecommendationMapper {
   private final ModelMapper modelMapper;
 
   public PurchaseRecommendationResponseDto toResponse(PurchaseRecommendation recommendation) {
+    if (recommendation == null) return null;
     return modelMapper.map(recommendation, PurchaseRecommendationResponseDto.class);
   }
 
   public List<PurchaseRecommendationResponseDto> toResponseList(
       List<PurchaseRecommendation> recommendations) {
+    if (recommendations == null) return List.of();
     return recommendations.stream().map(this::toResponse).toList();
   }
 }

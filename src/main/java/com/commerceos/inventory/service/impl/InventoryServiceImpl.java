@@ -1,5 +1,6 @@
 package com.commerceos.inventory.service.impl;
 
+import com.commerceos.inventory.calculator.ReorderPointCalculator;
 import com.commerceos.inventory.config.RabbitMQInventoryConfig;
 import com.commerceos.inventory.dto.request.AdjustStockRequestDto;
 import com.commerceos.inventory.dto.request.CreateProductRequestDto;
@@ -9,7 +10,6 @@ import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
 import com.commerceos.inventory.entity.StockMovement;
 import com.commerceos.inventory.event.LowStockEvent;
-import com.commerceos.inventory.event.ReorderPointCalculator;
 import com.commerceos.inventory.repository.ProductRepository;
 import com.commerceos.inventory.repository.StockItemRepository;
 import com.commerceos.inventory.repository.StockMovementRepository;
@@ -17,7 +17,6 @@ import com.commerceos.inventory.service.InventoryService;
 import com.commerceos.platform.exception.DuplicateResourceException;
 import com.commerceos.platform.exception.InsufficientStockException;
 import com.commerceos.platform.exception.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +40,6 @@ public class InventoryServiceImpl implements InventoryService {
   private final StockItemRepository stockItemRepository;
   private final StockMovementRepository stockMovementRepository;
   private final RabbitTemplate rabbitTemplate;
-  private final ObjectMapper objectMapper;
   private final ReorderPointCalculator reorderPointCalculator;
 
   // ---- Product CRUD ----
@@ -221,9 +219,8 @@ public class InventoryServiceImpl implements InventoryService {
             item.getReorderPoint(),
             LocalDateTime.now());
     try {
-      String json = objectMapper.writeValueAsString(event);
       rabbitTemplate.convertAndSend(
-          RabbitMQInventoryConfig.EXCHANGE, RabbitMQInventoryConfig.ROUTING_KEY, json);
+          RabbitMQInventoryConfig.EXCHANGE, RabbitMQInventoryConfig.ROUTING_KEY, event);
       log.info("Published low-stock event for product: {}", item.getProduct().getSku());
     } catch (Exception e) {
       log.error("Failed to publish low-stock event for product: {}", item.getProduct().getSku(), e);
