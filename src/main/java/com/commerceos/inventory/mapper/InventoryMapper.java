@@ -30,12 +30,21 @@ public class InventoryMapper {
   public StockItemResponseDto toStockItemResponse(StockItem item) {
     if (item == null) return null;
     ProductResponseDto productDto = toProductResponse(item.getProduct());
+    String status = "HEALTHY";
+    if (item.getQuantityOnHand() <= 0) {
+      status = "OUT_OF_STOCK";
+    } else if (item.getQuantityOnHand() <= item.getReorderPoint()) {
+      status = "LOW_STOCK";
+    }
     return new StockItemResponseDto(
         item.getId(),
         productDto,
         item.getQuantityOnHand(),
+        item.getQuantityReserved(),
         item.getReorderPoint(),
         item.getSafetyStock(),
+        status,
+        item.getVersion(),
         item.getCreatedAt(),
         item.getUpdatedAt());
   }
