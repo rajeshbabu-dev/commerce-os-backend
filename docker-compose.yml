@@ -1,0 +1,146 @@
+# =============================================================================
+# CommerceOS Backend — Development Docker Compose
+# =============================================================================
+# Usage: docker compose up -d --build
+#
+# Starts both infrastructure services and the Spring Boot backend application.
+# The backend connects to services using Docker service names (postgres, redis, etc.)
+# instead of localhost, making it fully self-contained.
+#
+# Services:
+#   backend    — Spring Boot application (port 8080)
+#   postgres   — PostgreSQL 16 (port 5432)
+#   redis      — Redis 7 (port 6379)
+#   rabbitmq   — RabbitMQ 3.13 + Management UI at http://localhost:15672
+#   mailhog    — MailHog SMTP + Web UI at http://localhost:8025
+#
+# For frontend development, run the frontend docker-compose separately.
+# =============================================================================
+
+services:
+  # -- Backend Application -------------------------------------------------------
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: commerceos-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/commerceos
+      SPRING_DATASOURCE_USERNAME: commerceos
+      SPRING_DATASOURCE_PASSWORD: commerceos_dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: "1025"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in .env file}"
+      JWT_ACCESS_TOKEN_TTL: "900000"
+      JWT_REFRESH_TOKEN_TTL: "604800000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+  # -- PostgreSQL ----------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: commerceos-postgres
+    environment:
+      POSTGRES_DB: commerceos
+      POSTGRES_USER: commerceos
+      POSTGRES_PASSWORD: commerceos_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commerceos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+#      postgress pgadmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: commerceos-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@commerceos.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+  # -- Redis ---------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: commerceos-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+  # -- RabbitMQ ------------------------------------------------------------------
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: commerceos-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+  # -- MailHog (Dev Email) -------------------------------------------------------
+  mailhog:
+    image: mailhog/mailhog
+    container_name: commerceos-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+    networks:
+      - backend-dev
+
+networks:
+  backend-dev:
+    driver: bridge
+
+volumes:
+  pg_data:
+  pgadmin_data:
+
+
