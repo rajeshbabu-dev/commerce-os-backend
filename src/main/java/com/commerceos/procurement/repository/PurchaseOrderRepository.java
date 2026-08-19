@@ -11,10 +11,13 @@ import org.springframework.data.repository.query.Param;
 
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, UUID> {
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items"})
   Page<PurchaseOrder> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items"})
   Page<PurchaseOrder> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items"})
   Page<PurchaseOrder> findByCreatedByOrderByCreatedAtDesc(UUID createdBy, Pageable pageable);
 
   Optional<PurchaseOrder> findByIdempotencyKey(String idempotencyKey);
