@@ -1,0 +1,106 @@
+name: CommerceOS Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - stage
+      - develop
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Test & Lint (JDK 21, Spotless, Maven Test)
+  # ---------------------------------------------------------------------------
+  test-and-lint:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Check Code Formatting (Spotless)
+        run: ./mvnw spotless:check
+
+      - name: Run Unit & Integration Tests
+        env:
+          SPRING_PROFILES_ACTIVE: dev
+          JWT_SECRET: dev_secret_key_commerceos_backend_jwt_signature_key_min_256_bits
+        run: ./mvnw clean test
+
+  # ---------------------------------------------------------------------------
+  # 2. Build Docker Image
+  # ---------------------------------------------------------------------------
+  build-docker:
+    name: Build Docker Image
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: commerceos-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ---------------------------------------------------------------------------
+  # 3. Deploy to Render (Production on push to main only)
+  # ---------------------------------------------------------------------------
+  deploy-production:
+    name: Deploy to Render (Production)
+    needs: [test-and-lint, build-docker]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Check Render Deploy Hook Secret
+        id: check-secret
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK secret is not set in repository secrets!"
+            exit 1
+          fi
+
+      - name: Trigger Render Deploy Hook
+        run: |
+          echo "Triggering Render Production Deployment..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Successfully triggered Render deployment (HTTP $HTTP_STATUS)"
+          else
+            echo "::error::Failed to trigger Render deploy hook. Received HTTP status: $HTTP_STATUS"
+            exit 1
+          fi
