@@ -1,0 +1,3 @@
+INSERT INTO recommendation.purchase_recommendations (id, product_id, recommended_supplier_id, recommended_quantity, unit_cost, estimated_total_cost, urgency_level, confidence_score, llm_reasoning, status) VALUES
+    ('e1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000003', 'd1000000-0000-0000-0000-000000000003', 20, 75.00, 1500.00, 'CRITICAL', 94.50, 'Stock level (8) dropped below safety stock (5). High velocity product with 12-day vendor lead time.', 'OPEN'),
+    ('e1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000005', 'd1000000-0000-0000-0000-000000000005', 15, 38.00,  570.00, 'HIGH',     88.00, 'Product is currently completely out of stock (0 on hand). Immediate reorder recommended.', 'OPEN');
