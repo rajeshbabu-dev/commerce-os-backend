@@ -2,7 +2,7 @@
 # Production Profile
 # =============================================================================
 # For production environment.
-# Maximum security and performance settings.
+# Maximum security and cloud-native compatibility settings.
 # =============================================================================
 
 spring:
@@ -12,11 +12,11 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 10
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
       idle-timeout: 300000
       max-lifetime: 1200000
-      connection-timeout: 20000
+      connection-timeout: 30000
 
   jpa:
     hibernate:
@@ -31,15 +31,20 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL:false}
 
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
+    host: ${SPRING_RABBITMQ_HOST:localhost}
     port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    ssl:
+      enabled: ${SPRING_RABBITMQ_SSL:false}
     listener:
       simple:
         retry:
@@ -49,10 +54,10 @@ spring:
           multiplier: 2
 
   mail:
-    host: ${SPRING_MAIL_HOST}
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -64,16 +69,16 @@ server:
   port: ${SERVER_PORT:${PORT:8080}}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://*.vercel.app}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://*.vercel.app,http://localhost:*,http://127.0.0.1:*}
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
   access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
   refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:7d}
 
 llm:
   provider: ${LLM_PROVIDER:claude}
-  api-key: ${LLM_API_KEY}
+  api-key: ${LLM_API_KEY:dummy-key}
   timeout: 15s
 
 # Actuator - minimal endpoints in production
@@ -84,12 +89,12 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: never
+      show-details: always
 
 # Logging
 logging:
   level:
-    com.commerceos: WARN
+    com.commerceos: INFO
     org.hibernate.SQL: ERROR
-    org.springframework: WARN
-    root: WARN
+    org.springframework: INFO
+    root: INFO
