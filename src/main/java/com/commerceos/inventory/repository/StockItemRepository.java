@@ -13,4 +13,9 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
   @EntityGraph(attributePaths = "product")
   @Override
   java.util.List<StockItem> findAll();
+
+  @EntityGraph(attributePaths = "product")
+  @Override
+  org.springframework.data.domain.Page<StockItem> findAll(
+      org.springframework.data.domain.Pageable pageable);
 }

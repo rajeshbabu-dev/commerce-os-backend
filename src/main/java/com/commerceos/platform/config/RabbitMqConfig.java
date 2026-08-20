@@ -21,4 +21,11 @@ public class RabbitMqConfig {
   public Jackson2JsonMessageConverter jacksonMessageConverter(ObjectMapper objectMapper) {
     return new Jackson2JsonMessageConverter(objectMapper);
   }
+
+  @Bean
+  public org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer
+      rabbitTemplateCustomizer(
+          com.commerceos.platform.logging.RabbitMqCorrelationInterceptor interceptor) {
+    return rabbitTemplate -> rabbitTemplate.addBeforePublishPostProcessors(interceptor);
+  }
 }

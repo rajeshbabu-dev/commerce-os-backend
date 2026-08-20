@@ -7,7 +7,10 @@ public record StockItemResponseDto(
     UUID id,
     ProductResponseDto product,
     int quantityOnHand,
+    int quantityReserved,
     int reorderPoint,
     int safetyStock,
+    String status,
+    int version,
     LocalDateTime createdAt,
     LocalDateTime updatedAt) {}

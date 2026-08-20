@@ -12,7 +12,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
-  @Value("${cors.allowed-origins:http://localhost:*,http://127.0.0.1:*,https://*.vercel.app}")
+  @Value("${cors.allowed-origins:${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*,https://*.vercel.app,https://*.render.com}}")
   private String allowedOrigins;
 
   @Bean

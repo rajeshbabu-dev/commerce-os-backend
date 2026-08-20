@@ -16,10 +16,7 @@ public interface PurchaseRecommendationRepository
 
   List<PurchaseRecommendation> findByProductIdAndStatus(UUID productId, String status);
 
-  Page<PurchaseRecommendation> findAllByOrderByCreatedAtDesc(Pageable pageable);
+  Page<PurchaseRecommendation> findByProductId(UUID productId, Pageable pageable);
 
-  Page<PurchaseRecommendation> findByProductIdOrderByCreatedAtDesc(
-      UUID productId, Pageable pageable);
-
-  Page<PurchaseRecommendation> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
+  Page<PurchaseRecommendation> findByStatus(String status, Pageable pageable);
 }

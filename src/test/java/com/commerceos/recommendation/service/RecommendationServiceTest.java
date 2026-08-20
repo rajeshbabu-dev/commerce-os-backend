@@ -99,7 +99,8 @@ class RecommendationServiceTest {
             .build();
 
     Page<PurchaseRecommendation> page = new PageImpl<>(List.of(rec));
-    when(recommendationRepository.findAllByOrderByCreatedAtDesc(any())).thenReturn(page);
+    when(recommendationRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+        .thenReturn(page);
 
     Page<PurchaseRecommendation> result = recommendationService.listAll(PageRequest.of(0, 20));
 
@@ -120,8 +121,7 @@ class RecommendationServiceTest {
             .build();
 
     Page<PurchaseRecommendation> page = new PageImpl<>(List.of(rec));
-    when(recommendationRepository.findByProductIdOrderByCreatedAtDesc(eq(productId), any()))
-        .thenReturn(page);
+    when(recommendationRepository.findByProductId(eq(productId), any())).thenReturn(page);
 
     Page<PurchaseRecommendation> result =
         recommendationService.getByProductId(productId, PageRequest.of(0, 10));
