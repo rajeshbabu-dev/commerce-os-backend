@@ -2,18 +2,18 @@
 # Production Profile
 # =============================================================================
 # For production environment.
-# Maximum security and cloud-native compatibility settings.
+# Scoped PROD_* variable injections with standard fallbacks.
 # =============================================================================
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${PROD_DB_URL:${PROD_DATASOURCE_URL:${SPRING_DATASOURCE_URL}}}
+    username: ${PROD_DB_USERNAME:${PROD_DATASOURCE_USERNAME:${SPRING_DATASOURCE_USERNAME}}}
+    password: ${PROD_DB_PASSWORD:${PROD_DATASOURCE_PASSWORD:${SPRING_DATASOURCE_PASSWORD}}}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
-      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      maximum-pool-size: ${PROD_DB_POOL_MAX_SIZE:${DB_POOL_MAX_SIZE:10}}
+      minimum-idle: ${PROD_DB_POOL_MIN_IDLE:${DB_POOL_MIN_IDLE:2}}
       idle-timeout: 300000
       max-lifetime: 1200000
       connection-timeout: 30000
@@ -31,20 +31,20 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      host: ${PROD_REDIS_HOST:${SPRING_DATA_REDIS_HOST:localhost}}
+      port: ${PROD_REDIS_PORT:${SPRING_DATA_REDIS_PORT:6379}}
+      password: ${PROD_REDIS_PASSWORD:${SPRING_DATA_REDIS_PASSWORD:}}
       ssl:
-        enabled: ${SPRING_DATA_REDIS_SSL:false}
+        enabled: ${PROD_REDIS_SSL:${SPRING_DATA_REDIS_SSL:true}}
 
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:localhost}
-    port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME:guest}
-    password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    host: ${PROD_RABBITMQ_HOST:${SPRING_RABBITMQ_HOST:localhost}}
+    port: ${PROD_RABBITMQ_PORT:${SPRING_RABBITMQ_PORT:5672}}
+    username: ${PROD_RABBITMQ_USERNAME:${SPRING_RABBITMQ_USERNAME:guest}}
+    password: ${PROD_RABBITMQ_PASSWORD:${SPRING_RABBITMQ_PASSWORD:guest}}
+    virtual-host: ${PROD_RABBITMQ_VIRTUAL_HOST:${SPRING_RABBITMQ_VIRTUAL_HOST:/}}
     ssl:
-      enabled: ${SPRING_RABBITMQ_SSL:false}
+      enabled: ${PROD_RABBITMQ_SSL:${SPRING_RABBITMQ_SSL:false}}
     listener:
       simple:
         retry:
@@ -54,10 +54,10 @@ spring:
           multiplier: 2
 
   mail:
-    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
-    port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:}
-    password: ${SPRING_MAIL_PASSWORD:}
+    host: ${PROD_MAIL_HOST:${SPRING_MAIL_HOST:smtp.gmail.com}}
+    port: ${PROD_MAIL_PORT:${SPRING_MAIL_PORT:587}}
+    username: ${PROD_MAIL_USERNAME:${SPRING_MAIL_USERNAME:}}
+    password: ${PROD_MAIL_PASSWORD:${SPRING_MAIL_PASSWORD:}}
     properties:
       mail:
         smtp:
@@ -69,16 +69,16 @@ server:
   port: ${SERVER_PORT:${PORT:8080}}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://*.vercel.app,http://localhost:*,http://127.0.0.1:*}
+  allowed-origins: ${PROD_CORS_ALLOWED_ORIGINS:${CORS_ALLOWED_ORIGINS:https://*.vercel.app,http://localhost:*,http://127.0.0.1:*}}
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
-  refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:7d}
+  secret: ${PROD_JWT_SECRET:${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}}
+  access-token-ttl: ${PROD_JWT_ACCESS_TOKEN_TTL:${JWT_ACCESS_TOKEN_TTL:15m}}
+  refresh-token-ttl: ${PROD_JWT_REFRESH_TOKEN_TTL:${JWT_REFRESH_TOKEN_TTL:7d}}
 
 llm:
-  provider: ${LLM_PROVIDER:claude}
-  api-key: ${LLM_API_KEY:dummy-key}
+  provider: ${PROD_LLM_PROVIDER:${LLM_PROVIDER:claude}}
+  api-key: ${PROD_LLM_API_KEY:${LLM_API_KEY:dummy-key}}
   timeout: 15s
 
 # Actuator - minimal endpoints in production

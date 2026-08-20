@@ -2,18 +2,18 @@
 # Staging Profile
 # =============================================================================
 # For staging/pre-production environment.
-# Mirrors production configuration with staging-specific values.
+# Scoped STAGE_* variable injections with standard fallbacks.
 # =============================================================================
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${STAGE_DB_URL:${STAGE_DATASOURCE_URL:${SPRING_DATASOURCE_URL}}}
+    username: ${STAGE_DB_USERNAME:${STAGE_DATASOURCE_USERNAME:${SPRING_DATASOURCE_USERNAME}}}
+    password: ${STAGE_DB_PASSWORD:${STAGE_DATASOURCE_PASSWORD:${SPRING_DATASOURCE_PASSWORD}}}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
+      maximum-pool-size: ${STAGE_DB_POOL_MAX_SIZE:${DB_POOL_MAX_SIZE:10}}
+      minimum-idle: ${STAGE_DB_POOL_MIN_IDLE:${DB_POOL_MIN_IDLE:2}}
       idle-timeout: 300000
       max-lifetime: 1200000
 
@@ -30,15 +30,20 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      host: ${STAGE_REDIS_HOST:${SPRING_DATA_REDIS_HOST:localhost}}
+      port: ${STAGE_REDIS_PORT:${SPRING_DATA_REDIS_PORT:6379}}
+      password: ${STAGE_REDIS_PASSWORD:${SPRING_DATA_REDIS_PASSWORD:}}
+      ssl:
+        enabled: ${STAGE_REDIS_SSL:${SPRING_DATA_REDIS_SSL:false}}
 
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
+    host: ${STAGE_RABBITMQ_HOST:${SPRING_RABBITMQ_HOST:localhost}}
+    port: ${STAGE_RABBITMQ_PORT:${SPRING_RABBITMQ_PORT:5672}}
+    username: ${STAGE_RABBITMQ_USERNAME:${SPRING_RABBITMQ_USERNAME:guest}}
+    password: ${STAGE_RABBITMQ_PASSWORD:${SPRING_RABBITMQ_PASSWORD:guest}}
+    virtual-host: ${STAGE_RABBITMQ_VIRTUAL_HOST:${SPRING_RABBITMQ_VIRTUAL_HOST:/}}
+    ssl:
+      enabled: ${STAGE_RABBITMQ_SSL:${SPRING_RABBITMQ_SSL:false}}
     listener:
       simple:
         retry:
@@ -48,10 +53,10 @@ spring:
           multiplier: 2
 
   mail:
-    host: ${SPRING_MAIL_HOST}
-    port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    host: ${STAGE_MAIL_HOST:${SPRING_MAIL_HOST:smtp.gmail.com}}
+    port: ${STAGE_MAIL_PORT:${SPRING_MAIL_PORT:587}}
+    username: ${STAGE_MAIL_USERNAME:${SPRING_MAIL_USERNAME:}}
+    password: ${STAGE_MAIL_PASSWORD:${SPRING_MAIL_PASSWORD:}}
     properties:
       mail:
         smtp:
@@ -60,22 +65,22 @@ spring:
             enable: true
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:${PORT:8080}}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://*.vercel.app,http://localhost:*}
+  allowed-origins: ${STAGE_CORS_ALLOWED_ORIGINS:${CORS_ALLOWED_ORIGINS:https://*.vercel.app,http://localhost:*,http://127.0.0.1:*}}
 
 jwt:
-  secret: ${JWT_SECRET}
-  access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
-  refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:7d}
+  secret: ${STAGE_JWT_SECRET:${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}}
+  access-token-ttl: ${STAGE_JWT_ACCESS_TOKEN_TTL:${JWT_ACCESS_TOKEN_TTL:15m}}
+  refresh-token-ttl: ${STAGE_JWT_REFRESH_TOKEN_TTL:${JWT_REFRESH_TOKEN_TTL:7d}}
 
 llm:
-  provider: ${LLM_PROVIDER:claude}
-  api-key: ${LLM_API_KEY}
+  provider: ${STAGE_LLM_PROVIDER:${LLM_PROVIDER:claude}}
+  api-key: ${STAGE_LLM_API_KEY:${LLM_API_KEY:dummy-key}}
   timeout: 10s
 
-# Actuator - limited endpoints in staging
+# Actuator - monitoring endpoints in staging
 management:
   endpoints:
     web:
@@ -83,7 +88,7 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
 
 # Logging
 logging:
