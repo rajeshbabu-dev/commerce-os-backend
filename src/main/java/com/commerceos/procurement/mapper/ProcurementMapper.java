@@ -7,22 +7,22 @@ import com.commerceos.procurement.entity.PoStatusHistory;
 import com.commerceos.procurement.entity.PurchaseOrder;
 import com.commerceos.procurement.entity.PurchaseOrderItem;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class ProcurementMapper {
-
-  private final ModelMapper modelMapper;
 
   public PoResponseDto toPoResponse(PurchaseOrder po) {
     if (po == null) return null;
-    List<PoItemResponseDto> itemDtos =
-        po.getItems() != null
-            ? po.getItems().stream().map(this::toPoItemResponse).toList()
-            : List.of();
+    List<PoItemResponseDto> itemDtos = List.of();
+    try {
+      if (po.getItems() != null && Hibernate.isInitialized(po.getItems())) {
+        itemDtos = po.getItems().stream().map(this::toPoItemResponse).toList();
+      }
+    } catch (Exception ignored) {
+      // Fallback if collection proxy is uninitialized outside transaction
+    }
     return new PoResponseDto(
         po.getId(),
         po.getSupplierId(),
@@ -42,12 +42,23 @@ public class ProcurementMapper {
 
   public PoItemResponseDto toPoItemResponse(PurchaseOrderItem item) {
     if (item == null) return null;
-    return modelMapper.map(item, PoItemResponseDto.class);
+    return new PoItemResponseDto(
+        item.getId(),
+        item.getProductId(),
+        item.getQuantity() != null ? item.getQuantity() : 0,
+        item.getUnitPrice(),
+        item.getSubtotal());
   }
 
   public PoStatusHistoryResponseDto toStatusHistoryResponse(PoStatusHistory history) {
     if (history == null) return null;
-    return modelMapper.map(history, PoStatusHistoryResponseDto.class);
+    return new PoStatusHistoryResponseDto(
+        history.getId(),
+        history.getOldStatus(),
+        history.getNewStatus(),
+        history.getChangedBy(),
+        history.getReason(),
+        history.getChangedAt());
   }
 
   public List<PoStatusHistoryResponseDto> toStatusHistoryResponseList(

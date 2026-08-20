@@ -7,19 +7,21 @@ import com.commerceos.inventory.entity.Product;
 import com.commerceos.inventory.entity.StockItem;
 import com.commerceos.inventory.entity.StockMovement;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class InventoryMapper {
-
-  private final ModelMapper modelMapper;
 
   public ProductResponseDto toProductResponse(Product product) {
     if (product == null) return null;
-    return modelMapper.map(product, ProductResponseDto.class);
+    return new ProductResponseDto(
+        product.getId(),
+        product.getName(),
+        product.getSku(),
+        product.getDescription(),
+        product.getUnitOfMeasure(),
+        product.getCreatedAt(),
+        product.getUpdatedAt());
   }
 
   public List<ProductResponseDto> toProductResponseList(List<Product> products) {
