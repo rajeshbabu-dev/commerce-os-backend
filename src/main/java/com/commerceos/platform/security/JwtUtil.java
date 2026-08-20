@@ -30,6 +30,14 @@ public class JwtUtil {
     this.refreshTokenExpirationMs = refreshTokenExpirationMs;
   }
 
+  public long getAccessTokenExpirationMs() {
+    return accessTokenExpirationMs;
+  }
+
+  public long getRefreshTokenExpirationMs() {
+    return refreshTokenExpirationMs;
+  }
+
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
   }
@@ -44,13 +52,11 @@ public class JwtUtil {
   }
 
   public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    String subject = userDetails.getUsername();
-    return buildToken(extraClaims, subject, accessTokenExpirationMs);
+    return buildToken(extraClaims, userDetails.getUsername(), accessTokenExpirationMs);
   }
 
   public String generateRefreshToken(UserDetails userDetails) {
-    String subject = userDetails.getUsername();
-    return buildToken(new HashMap<>(), subject, refreshTokenExpirationMs);
+    return buildToken(new HashMap<>(), userDetails.getUsername(), refreshTokenExpirationMs);
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -66,17 +72,18 @@ public class JwtUtil {
     return extractClaim(token, Claims::getExpiration);
   }
 
-  private Claims extractAllClaims(String token) {
-    return Jwts.parser().verifyWith(signInKey).build().parseSignedClaims(token).getPayload();
-  }
-
   private String buildToken(Map<String, Object> extraClaims, String subject, long expirationMs) {
+    long now = System.currentTimeMillis();
     return Jwts.builder()
         .claims(extraClaims)
         .subject(subject)
-        .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(new Date(System.currentTimeMillis() + expirationMs))
+        .issuedAt(new Date(now))
+        .expiration(new Date(now + expirationMs))
         .signWith(signInKey)
         .compact();
+  }
+
+  private Claims extractAllClaims(String token) {
+    return Jwts.parser().verifyWith(signInKey).build().parseSignedClaims(token).getPayload();
   }
 }

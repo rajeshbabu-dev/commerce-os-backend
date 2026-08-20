@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,12 +45,6 @@ public class AuthServiceImpl implements AuthService {
   private final JwtUtil jwtUtil;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
-
-  @Value("${jwt.refresh-token-ttl:604800000}")
-  private long refreshTokenTtlMs;
-
-  @Value("${jwt.access-token-ttl:900000}")
-  private long accessTokenTtlMs;
 
   @Override
   @Transactional
@@ -217,12 +210,12 @@ public class AuthServiceImpl implements AuthService {
     String accessToken = jwtUtil.generateAccessToken(user);
     String refreshToken = jwtUtil.generateRefreshToken(user);
 
-    long ttlSeconds = refreshTokenTtlMs / 1000;
+    long ttlSeconds = Math.max(1, jwtUtil.getRefreshTokenExpirationMs() / 1000);
     refreshTokenRedisService.store(refreshToken, user.getId(), user.getEmail(), ttlSeconds);
 
     Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
 
-    long accessTokenExpiresInSeconds = accessTokenTtlMs / 1000;
+    long accessTokenExpiresInSeconds = Math.max(1, jwtUtil.getAccessTokenExpirationMs() / 1000);
     return AuthResponseDto.of(accessToken, refreshToken, accessTokenExpiresInSeconds, roleNames);
   }
 }

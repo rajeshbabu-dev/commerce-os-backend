@@ -19,7 +19,6 @@ import com.commerceos.platform.security.JwtUtil;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -43,12 +41,6 @@ class AuthServiceTest {
   @Mock private AuthenticationManager authenticationManager;
 
   @InjectMocks private AuthServiceImpl authService;
-
-  @BeforeEach
-  void setUp() {
-    ReflectionTestUtils.setField(authService, "refreshTokenTtlMs", 604800000L);
-    ReflectionTestUtils.setField(authService, "accessTokenTtlMs", 900000L);
-  }
 
   @Test
   @DisplayName("createUser success when admin creates user")

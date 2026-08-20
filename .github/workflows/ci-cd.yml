@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
+      - develop
+      - stage
   pull_request:
     branches:
       - main
+      - develop
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -81,21 +84,16 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Check Render Deploy Hook Secret
-        id: check-secret
-        run: |
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
-            echo "::error::RENDER_DEPLOY_HOOK secret is not set in repository secrets!"
-            exit 1
-          fi
-
       - name: Trigger Render Deploy Hook
         run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "RENDER_DEPLOY_HOOK secret is not set in GitHub secrets. Render Native Auto-Deploy will handle the deployment directly."
+            exit 0
+          fi
           echo "Triggering Render Production Deployment..."
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
             echo "Successfully triggered Render deployment (HTTP $HTTP_STATUS)"
           else
-            echo "::error::Failed to trigger Render deploy hook. Received HTTP status: $HTTP_STATUS"
-            exit 1
+            echo "::warning::Render deploy hook returned HTTP status $HTTP_STATUS"
           fi
